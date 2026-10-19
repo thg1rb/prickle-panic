@@ -1,0 +1,149 @@
+# W008 Independent Specification Review
+
+## Review 1
+
+### Reviewed revision
+
+- Pull Request: #10
+- Commit SHA: `8391d663f7176e1fddd64829f00ca18ba69e062d`
+- Reviewer execution reference: Independent Sub-Agent
+
+### Evidence inspected
+
+- Requirements: `docs/REQUIREMENT.md` §§6.1–6.7, 16.1, 20, 28, and 32
+- Specification: `docs/development/work-items/W008-guest-session.md`
+- Task plan: `docs/development/work-items/W008-task-plan.md`
+- Protocol boundary: `docs/protocol/v1/README.md`
+- Bundled W007 completion status update and exact merged review/CI evidence
+
+### Findings
+
+| ID | Severity | Evidence and impact | Required remediation |
+|---|---|---|---|
+| W008-SR-01 | MAJOR | §6.2 explicitly permits Thai, English, and numbers but does not define them as an exclusive allowlist. W008 did not state whether other safe Unicode, including emoji, is valid, risking an unapproved restriction. | State that listed categories are guaranteed accepted but not an exclusive allowlist, or obtain Project Owner approval before introducing a narrower policy. |
+| W008-SR-02 | MINOR | §20 SEC-006 requires rate limits for sensitive operations. W008 introduces unauthenticated session creation but assigned rate-limit enforcement solely to W013, leaving an exposed endpoint without an interim guard. | Add a configurable session-creation limit and tests, or gate public endpoint exposure on W013. Record ownership and validation evidence. |
+
+### Bundled W007 update
+
+The reviewer confirmed changing W007 to DONE is supported by exact-head review PASS, CI pass, merged PR #9, and retained branch. No scope issue was found.
+
+### Decision
+
+FAIL
+
+Reason: W008-SR-01 is a material behavior ambiguity and W008-SR-02 leaves an unauthenticated sensitive endpoint without an explicit release protection. No implementation or tests were run; this was a specification-only review.
+
+## Review 2
+
+### Reviewed revision
+
+- Pull Request: #10
+- Commit SHA: `675f770f25583edd4bf9d149e53986b689172573`
+- Reviewer execution reference: Independent Sub-Agent
+
+### Findings and re-review
+
+- W008-SR-01 — RESOLVED. The named character categories are accepted but not an exclusive allowlist; other safe Unicode is permitted.
+- W008-SR-02 — RESOLVED at specification level. A configurable pre-authentication limiter, non-session-only protection, no-allocation rejection tests, and a public-exposure gate are required. Threshold/source remain T01 design proposals.
+- No new BLOCKER, MAJOR, or MINOR findings. The reviewer recommends defining concrete unsafe Unicode/rendering test vectors in T01 while preserving safe scripts.
+- Bundled W007 completion update remains supported by its merged PR, exact-head PASS, CI, and retained branch.
+
+### Decision
+
+PASS
+
+Reason: Both prior findings are resolved in the specification, and no blocking or major findings remain. This PASS applies to the exact specification revision above; no implementation or tests were run.
+
+## Review 3
+
+### Reviewed revision
+
+- Pull Request: #10
+- Commit SHA: `41be8e8f2d984151b2fbb185cd18271a5e4fb21d`
+- Reviewer execution reference: Independent Sub-Agent
+
+### Evidence inspected
+
+- Requirements: `docs/REQUIREMENT.md` §§6.1–6.7, 16.1, 20, and 32
+- Specification: `docs/development/work-items/W008-guest-session.md`
+- Task plan: `docs/development/work-items/W008-task-plan.md`
+- Protocol boundary: `docs/protocol/v1/README.md`
+
+### Finding
+
+| ID | Severity | Evidence and impact | Required remediation |
+|---|---|---|---|
+| W008-SR-03 | MINOR | The design covers bidi isolation in the UI but does not explicitly assess embedded Unicode bidirectional override/isolate controls. Those controls can affect the displayed order of username text despite surrounding isolation. | Explicitly assess and test bidi controls while preserving ZWJ emoji support. Keep any policy change subject to Project Owner approval. |
+
+### Decision
+
+PASS
+
+Reason: No BLOCKER or MAJOR findings remain. The MINOR follow-up is addressed in the next specification revision with a proposed rejection policy and test vectors for Bidi_Control characters, while preserving Arabic text and ZWJ emoji; that revision requires a fresh review. This review covered specifications only; no implementation or tests were inspected or run.
+
+## Review 4
+
+### Reviewed revision
+
+- Pull Request: #10
+- Commit SHA: `97a6ff4f0c6b95420b76b45fb50ba9895dce2949`
+- Reviewer execution reference: Independent Sub-Agent
+
+### Evidence inspected
+
+- Requirements: `docs/REQUIREMENT.md` §§6.1–6.7, 16.1, 20, and 32
+- Specification: `docs/development/work-items/W008-guest-session.md`
+- Task plan: `docs/development/work-items/W008-task-plan.md`
+- Protocol boundary: `docs/protocol/v1/README.md`
+- Revision diff from the prior review
+
+### Findings and re-review
+
+- W008-SR-03 — RESOLVED. The proposed policy names the Unicode Bidi_Control characters to reject, adds test vectors, and preserves Arabic text and ZWJ emoji.
+- No new findings.
+
+### Decision
+
+PASS
+
+Reason: The remaining stricter username filter is explicitly a proposal requiring Project Owner approval before implementation. No requirement conflict was found. This review covered specifications only; no implementation or tests were inspected or run.
+
+## Review 5
+
+### Reviewed revision
+
+- Pull Request: #10
+- Commit SHA: `cd37fb4096b1da295d7736985979b382f008bcf6`
+- Reviewer execution reference: Independent Sub-Agent (`/root/w008_spec_review`)
+- Review type: Specification and requirement source only
+
+### Evidence inspected
+
+- `docs/REQUIREMENT.md` §§6.2, 6.5, 13.1, and 14.4
+- `docs/development/work-items/W008-guest-session.md`
+- `docs/development/work-items/W008-task-plan.md`
+- Exact revision and related changes in the PR
+
+### Findings
+
+No BLOCKER, MAJOR, MINOR, or SUGGESTION findings.
+
+### Decision
+
+PASS. The owner-approved username rules, 24-hour idle and 7-day absolute session lifetime, qualifying activity, credential/cookie policy, session creation limit, and immediate active-Match forfeit on session expiry agree between the requirement source and W008 specification. No implementation or tests were reviewed or run. This PASS applies to specification revision `cd37fb4096b1da295d7736985979b382f008bcf6` and does not authorize merge.
+
+## Review 6 — PR scope reconciliation
+
+- Pull Request: #10
+- Reviewed PR head: `32bd3f45ae129ac0dfca9e0f9e6d41625629a90a`
+- Reviewer execution reference: Independent read-only Sub-Agent (`/root/w008_spec_review`)
+- Scope: Confirmed W008 content remains identical to the previously approved and reviewed policy revision; checked the complete PR diff for unrelated W007 edits.
+- Decision: PASS. W008 policy/specification content is unchanged; the unrelated W007 file no longer appears in the PR diff. No new findings. No implementation or tests were reviewed or run. This review does not authorize merge.
+
+## Review 7 — Specification readiness status
+
+- Pull Request: #10
+- Reviewed PR head: `daae4de3c4d84daae6264bf5d8e3c184f069df7d`
+- Reviewer execution reference: Independent read-only Sub-Agent (`/root/w008_spec_review`)
+- Scope: Consistency of W008 specification/task-plan state with exact-revision independent review evidence and pending integration status.
+- Decision: PASS. Both documents identify the specification as `SPEC_READY`; the policy/specification PASS and scope review PASS support that state, and PR #10 integration remains explicitly pending. No new findings. This status-only review does not authorize merge or implementation.
