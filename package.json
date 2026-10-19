@@ -1,0 +1,15 @@
+{
+  "name": "prickle-panic",
+  "private": true,
+  "packageManager": "pnpm@10.29.2",
+  "engines": {
+    "node": ">=22.12.0",
+    "pnpm": ">=10.29.2"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @prickle-panic/web dev",
+    "build": "pnpm --filter @prickle-panic/web build",
+    "typecheck": "pnpm --filter @prickle-panic/web typecheck",
+    "server:run": "go -C apps/server run ./cmd/server"
+  }
+}
