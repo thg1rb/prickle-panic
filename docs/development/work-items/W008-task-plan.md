@@ -1,6 +1,6 @@
 # Task Plan — W008: Guest Session
 
-Specification: `docs/development/work-items/W008-guest-session.md` (READY_FOR_REVIEW; approved revision required before implementation)
+Specification: `docs/development/work-items/W008-guest-session.md` (SPEC_READY; Project Owner approval required before implementation)
 Branch: `feature/W008-guest-session`
 
 | Task | Change | Requirement / acceptance refs | Deliverable | Validation |

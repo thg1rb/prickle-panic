@@ -35,4 +35,21 @@ Reason: W008-SR-01 is a material behavior ambiguity and W008-SR-02 leaves an una
 
 ## Review 2
 
-Pending independent re-review of the remediation revision.
+### Reviewed revision
+
+- Pull Request: #10
+- Commit SHA: `675f770f25583edd4bf9d149e53986b689172573`
+- Reviewer execution reference: Independent Sub-Agent
+
+### Findings and re-review
+
+- W008-SR-01 — RESOLVED. The named character categories are accepted but not an exclusive allowlist; other safe Unicode is permitted.
+- W008-SR-02 — RESOLVED at specification level. A configurable pre-authentication limiter, non-session-only protection, no-allocation rejection tests, and a public-exposure gate are required. Threshold/source remain T01 design proposals.
+- No new BLOCKER, MAJOR, or MINOR findings. The reviewer recommends defining concrete unsafe Unicode/rendering test vectors in T01 while preserving safe scripts.
+- Bundled W007 completion update remains supported by its merged PR, exact-head PASS, CI, and retained branch.
+
+### Decision
+
+PASS
+
+Reason: Both prior findings are resolved in the specification, and no blocking or major findings remain. This PASS applies to the exact specification revision above; no implementation or tests were run.
