@@ -83,4 +83,27 @@ Reason: No BLOCKER or MAJOR findings remain. The MINOR follow-up is addressed in
 
 ## Review 4
 
-Pending independent review of the exact specification revision that proposes rejecting Unicode Bidi_Control characters and adds corresponding test vectors.
+### Reviewed revision
+
+- Pull Request: #10
+- Commit SHA: `97a6ff4f0c6b95420b76b45fb50ba9895dce2949`
+- Reviewer execution reference: Independent Sub-Agent
+
+### Evidence inspected
+
+- Requirements: `docs/REQUIREMENT.md` §§6.1–6.7, 16.1, 20, and 32
+- Specification: `docs/development/work-items/W008-guest-session.md`
+- Task plan: `docs/development/work-items/W008-task-plan.md`
+- Protocol boundary: `docs/protocol/v1/README.md`
+- Revision diff from the prior review
+
+### Findings and re-review
+
+- W008-SR-03 — RESOLVED. The proposed policy names the Unicode Bidi_Control characters to reject, adds test vectors, and preserves Arabic text and ZWJ emoji.
+- No new findings.
+
+### Decision
+
+PASS
+
+Reason: The remaining stricter username filter is explicitly a proposal requiring Project Owner approval before implementation. No requirement conflict was found. This review covered specifications only; no implementation or tests were inspected or run.

@@ -122,7 +122,8 @@ Security references reviewed 2026-10-19: [OWASP Session Management Cheat Sheet](
 
 Review 1 at `8391d663f7176e1fddd64829f00ca18ba69e062d`: FAIL with W008-SR-01 (MAJOR, username allowlist ambiguity) and W008-SR-02 (MINOR, no interim unauthenticated session-creation limit). Remediation clarifies acceptance of other safe Unicode text and adds a configurable rate-limit requirement and public-exposure gate.
 - Review 2: PASS at specification revision `675f770f25583edd4bf9d149e53986b689172573`; both findings resolved, no new BLOCKER/MAJOR/MINOR findings. Reviewer recommends that T01 define unsafe Unicode/rendering test vectors without rejecting safe scripts. Full report: `docs/development/reviews/W008-review.md`.
-- Review 3: PASS at specification revision `41be8e8f2d984151b2fbb185cd18271a5e4fb21d`; the expanded design had no BLOCKER/MAJOR findings and one MINOR follow-up to assess embedded bidi controls. Review 4 is pending after adding that proposed policy and its test vectors.
+- Review 3: PASS at specification revision `41be8e8f2d984151b2fbb185cd18271a5e4fb21d`; the expanded design had no BLOCKER/MAJOR findings and one MINOR follow-up to assess embedded bidi controls. Review 4 resolved the follow-up.
+- Review 4: PASS at specification revision `97a6ff4f0c6b95420b76b45fb50ba9895dce2949`; the proposed Bidi_Control rejection is explicit, tested, and remains subject to Project Owner approval. No new findings.
 - Project Owner approval of the specification and proposed session policy is pending; implementation has not started.
 
 ## Implementation validation evidence
