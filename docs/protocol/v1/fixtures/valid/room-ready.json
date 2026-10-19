@@ -1,0 +1,6 @@
+{
+  "v": 1,
+  "type": "room.set_ready",
+  "requestId": "req-ready-001",
+  "payload": { "ready": true }
+}

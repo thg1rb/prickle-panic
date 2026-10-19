@@ -1,0 +1,13 @@
+{
+  "v": 1,
+  "type": "game.match.ended",
+  "seq": 7,
+  "payload": {
+    "matchId": "match-001",
+    "scores": [
+      { "playerId": "player-001", "score": 25, "rank": 1 },
+      { "playerId": "player-002", "score": 20, "rank": 2 }
+    ],
+    "winnerIds": ["player-001"]
+  }
+}

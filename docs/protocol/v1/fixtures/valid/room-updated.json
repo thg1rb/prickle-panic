@@ -1,0 +1,22 @@
+{
+  "v": 1,
+  "type": "room.updated",
+  "seq": 2,
+  "payload": {
+    "roomId": "room-001",
+    "players": [
+      {
+        "playerId": "player-001",
+        "username": "Coco",
+        "ready": true,
+        "isHost": true
+      },
+      {
+        "playerId": "player-002",
+        "username": "Hedgehog",
+        "ready": true,
+        "isHost": false
+      }
+    ]
+  }
+}

@@ -51,6 +51,9 @@ jobs:
       - name: Type check
         run: pnpm typecheck
 
+      - name: Protocol contract fixtures
+        run: pnpm protocol:check
+
       - name: Go tests
         run: pnpm test:go
 

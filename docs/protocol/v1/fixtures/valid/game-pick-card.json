@@ -1,0 +1,11 @@
+{
+  "v": 1,
+  "type": "game.pick_card",
+  "requestId": "req-pick-001",
+  "payload": {
+    "matchId": "match-001",
+    "cardId": "card-012",
+    "boardVersion": 18,
+    "referenceVersion": 7
+  }
+}

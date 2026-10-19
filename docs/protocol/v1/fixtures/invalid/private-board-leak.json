@@ -1,0 +1,19 @@
+{
+  "v": 1,
+  "type": "game.snapshot",
+  "seq": 25,
+  "payload": {
+    "matchId": "match-001",
+    "mode": "speed_battle",
+    "boardVersion": 1,
+    "referenceVersion": 1,
+    "cards": [],
+    "referenceCard": { "cardId": "reference-001", "variant": 0 },
+    "self": { "playerId": "player-001", "score": 0 },
+    "scores": [
+      { "playerId": "player-001", "score": 0 },
+      { "playerId": "player-002", "score": 0 }
+    ],
+    "otherPlayersBoards": [{ "playerId": "player-002", "cards": [] }]
+  }
+}

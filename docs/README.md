@@ -21,7 +21,8 @@ Requirements use the statuses CONFIRMED, BASELINE, TUNING, PROPOSED, DEFERRED, a
 
 - `agents/` — entry-point workflow, templates, and approved Skills registry.
 - `architecture/` — system boundaries and decision records.
-- `development/` — roadmap, Work Item specifications, and review evidence.
+- `protocol/` — versioned message schemas and contract fixtures.
+- `development/` — roadmap, Work Item specifications, implementation reports, and independent review evidence.
 - `development/standards.md` — local development commands and CI quality gates.
 - `testing/` — validation policy and evidence conventions.
 - `design/` and `standards/` — create when a Work Item needs authoritative detail in those areas.

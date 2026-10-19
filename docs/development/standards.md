@@ -8,7 +8,7 @@
 
 ## Local validation
 
-Run `pnpm check` before opening or updating a pull request. It runs formatting checks, lint, TypeScript checking, Go tests, Go vet, and the frontend production build. Security advisory checks are separately run with `pnpm audit --prod --audit-level high` and `cd apps/server && go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...`.
+Run `pnpm check` before opening or updating a pull request. It runs formatting checks, lint, TypeScript checking, protocol schema fixtures, Go tests, Go vet, and the frontend production build. Security advisory checks are separately run with `pnpm audit --prod --audit-level high` and `cd apps/server && go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...`.
 
 Oxlint is used for JS/TS linting because the current `typescript-eslint` parser does not support the project's TypeScript 7.0.2 compiler. React plugin rules are enabled; `react-in-jsx-scope` is allowed because the application uses React's automatic JSX runtime.
 
