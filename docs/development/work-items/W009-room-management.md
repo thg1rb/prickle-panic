@@ -131,6 +131,6 @@ Last updated: 2026-10-19
 ## Approval
 
 - Project Owner / authorized approver: Pending
-- Independent specification review: PASS at `48d7d76f0fafa545d72938942c2d5e400a0ad4ed`, recorded in `docs/development/reviews/W009-review.md`
+- Independent specification review: PASS at `654b0e87bc3272a6a502a783e113d379e36bb3af`, recorded in `docs/development/reviews/W009-review.md` (Review 4). This supersedes the earlier review of the pre-policy-sync revision.
 - Decision and date: Pending
 - W008 policy approval: Approved 2026-10-19; PR #10 final review/merge: Pending

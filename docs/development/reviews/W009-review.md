@@ -81,3 +81,20 @@ Reason: W009-SR-01 through W009-SR-04 are resolved, but W009-SR-05 remains a mat
 PASS
 
 Reason: The Room membership model no longer implies simultaneous active authority and remains consistent with INV-004. Multiple memberships remain allowed; no implicit leave or forfeit is introduced. This is a specification-only review; no implementation or tests were inspected or run.
+
+## Review 4
+
+### Reviewed revision
+
+- Pull Request: #11
+- Commit SHA: `654b0e87bc3272a6a502a783e113d379e36bb3af`
+- Reviewer execution reference: Independent Sub-Agent (`/root/w008_spec_review`)
+- Review scope: Requirement source, W009 specification, and task plan; no implementation or tests
+
+### Evidence and findings
+
+The reviewer confirmed the included `docs/REQUIREMENT.md` §§6.2, 6.5, and 14.4 match W009's approved-policy references, including Unicode normalization and validation, session credential and expiry behavior, and approved configurable session/Room limits. W009 distinguishes Owner approval of policy from pending review and merge of PR #10. No findings.
+
+### Decision
+
+PASS. This review applies to specification revision `654b0e87bc3272a6a502a783e113d379e36bb3af`; it does not authorize merge or implementation.
