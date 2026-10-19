@@ -3,6 +3,7 @@ package game
 import (
 	"errors"
 	"fmt"
+	"math"
 	"reflect"
 	"testing"
 )
@@ -175,6 +176,26 @@ func TestTechnicalErrorIsAtomicAndDoesNotConsumeRandomState(t *testing.T) {
 	rightResult, rightErr := right.Pick("card-0000000000000001")
 	if leftErr != nil || rightErr != nil || !reflect.DeepEqual(leftResult, rightResult) {
 		t.Fatalf("failed action affected future deterministic output: left=%+v/%v right=%+v/%v", leftResult, leftErr, rightResult, rightErr)
+	}
+}
+
+func TestCounterOverflowIsAtomic(t *testing.T) {
+	left := newTestEngine(0, []Variant{1, 6})
+	right := newTestEngine(0, []Variant{1, 6})
+	left.score = math.MaxUint64
+	right.score = math.MaxUint64
+	before := left.Snapshot()
+	if _, err := left.Pick("card-0000000000000001"); !errors.Is(err, ErrScoreOverflow) {
+		t.Fatalf("Pick error = %v, want ErrScoreOverflow", err)
+	}
+	if got := left.Snapshot(); !reflect.DeepEqual(got, before) {
+		t.Fatalf("overflow error mutated state: before=%+v after=%+v", before, got)
+	}
+	left.score, right.score = 0, 0
+	leftResult, leftErr := left.Pick("card-0000000000000001")
+	rightResult, rightErr := right.Pick("card-0000000000000001")
+	if leftErr != nil || rightErr != nil || !reflect.DeepEqual(leftResult, rightResult) {
+		t.Fatalf("overflow error consumed random state: left=%+v/%v right=%+v/%v", leftResult, leftErr, rightResult, rightErr)
 	}
 }
 

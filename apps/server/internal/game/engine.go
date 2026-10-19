@@ -12,7 +12,7 @@ const defaultBoardSize = 16
 var (
 	ErrInvalidConfig = errors.New("invalid game configuration")
 	ErrUnknownCard   = errors.New("card instance is not on the board")
-	ErrScoreOverflow = errors.New("score or combo counter overflow")
+	ErrScoreOverflow = errors.New("game state counter overflow")
 )
 
 // Config contains baseline gameplay values that may be tuned by callers.
