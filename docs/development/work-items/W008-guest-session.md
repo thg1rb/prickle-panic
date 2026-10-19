@@ -1,6 +1,6 @@
 # W008 — Guest Session
 
-Status: SPEC_READY
+Status: READY_FOR_REVIEW
 Type: Backend and Frontend Feature
 
 ## Goal
@@ -34,9 +34,9 @@ Create and recover an anonymous player identity without login, validate the play
 ## Expected behavior
 
 1. A first-time visitor can enter a username without creating an account.
-2. The client normalizes the submitted value only by trimming leading/trailing whitespace; server validation is authoritative and counts grapheme clusters.
-3. On valid creation, the server generates a unique opaque guest ID and a cryptographically unpredictable credential, stores only a non-reversible credential verifier where practical, sets the raw credential in an HttpOnly cookie, and returns the guest ID and display username.
-4. On invalid input, creation fails with a stable machine-readable error; no session or cookie is issued.
+2. The client submits the entered username; the server trims leading/trailing Unicode whitespace, validates grapheme count, and returns the canonical display username. The client remembers only that returned value.
+3. On valid creation, the server generates a unique opaque guest ID and a cryptographically unpredictable credential, stores only a non-reversible credential verifier, sets the raw credential in an HttpOnly cookie, and returns the guest ID, canonical display username, and expiry.
+4. On invalid input, creation fails with a stable machine-readable error; no session or cookie is issued. Expired or invalid recovery clears the stale cookie and returns the same unauthenticated error.
 5. On refresh, the client calls recovery; a valid credential restores the same guest identity and username, while missing, expired, or invalid credentials result in an unauthenticated state and Thai prompt to enter a username again.
 6. The credential is sent only by cookie over HTTPS in production and is never exposed to JavaScript or included in protocol messages.
 
@@ -76,12 +76,15 @@ Create and recover an anonymous player identity without login, validate the play
 ## Technical design
 
 - Go package boundary: `apps/server/internal/session/` owns guest identity, username validation, credential generation/verifier, expiry, and a concurrency-safe in-memory session store. It does not depend on HTTP or Rooms.
-- HTTP adapter: versioned endpoints under `/api/v1/guest-session` create and recover sessions, set/clear cookies, enforce request-size limits, and map domain errors to stable API codes. Exact endpoint/schema remains a proposal pending API design and review.
+- HTTP adapter proposal: `POST /api/v1/guest-session` creates a session with JSON `{ "username": "..." }`; `GET /api/v1/guest-session` recovers the session. Creation returns `201` with `{ "guestId", "username", "expiresAt" }`; the raw credential is cookie-only. Invalid usernames return `400 USERNAME_INVALID`; rate limits return `429 RATE_LIMITED` and `Retry-After`; missing/invalid sessions return `401 SESSION_REQUIRED`. Responses use `Cache-Control: no-store`. Reject unknown JSON fields, cap request bodies at 4 KiB, and reject malformed UTF-8. For POST require an exact configured `Origin`; for any request reject a present non-matching Origin or `Sec-Fetch-Site: cross-site`. Do not enable cross-origin credentials/CORS.
 - React client: add a guest-entry bootstrap state and API client; on app startup recover session with credentials included; keep only display username in localStorage; keep no authentication secret in JS-readable storage.
 - Integration seam: Room and WebSocket layers receive an authenticated `GuestSession` value from middleware/connection setup, never a caller-supplied guest ID.
-- Use `crypto/rand`; store a keyed or one-way verifier rather than raw cookie credentials if compatible with operational revocation and expiry requirements. Keep comparison constant-time. Choose the concrete verifier and cookie name in technical design.
-- Use a well-maintained Go Unicode grapheme segmentation dependency only if the standard library cannot meet §6.2; inspect licensing, maintenance, and compatibility and pin it through Go module metadata. Do not implement an exclusive username-script allowlist; treat names as text and reject only unsafe controls/rendering cases supported by §6.2.
-- Protect unauthenticated session creation with a configurable edge limit that works before a guest identity exists. The initial threshold and source signal remain a proposed security decision; validate spoofing and availability tradeoffs in technical design. Public exposure is gated on this protection.
+- Proposed credential design: generate a separate 16-byte random guest ID and 32-byte random session credential with `crypto/rand`; encode both as unpadded base64url strings with distinct prefixes. Store `SHA-256(credential)` as the in-memory lookup key, never the raw credential. The 256-bit credential is high-entropy, so a fast one-way digest is adequate for verifier storage; do not add a password hashing function or pepper secret.
+- Proposed expiry: fixed 24-hour absolute lifetime from creation; recovery does not extend it. Inject the clock into the session manager for deterministic expiry tests. Sweep expired sessions once per minute and stop the cleanup loop on server shutdown.
+- Proposed production cookie: `__Host-pp_guest`, `Secure`, `HttpOnly`, `SameSite=Lax`, `Path=/`, no `Domain`, and `Max-Age=86400`/matching `Expires`. For local HTTP development only, use `pp_guest_dev` without `Secure`; keep it host-only, HttpOnly, SameSite=Lax, and Path `/`. Configure Vite to proxy `/api` to Go so the browser uses same-origin requests; never enable the development cookie in production.
+- Proposed session-creation limiter: configurable in-memory rolling 60-second window, default 10 attempts per source IP, applied before request-body parsing and session allocation. Return `429` with `Retry-After`. Use `RemoteAddr` unless the immediate peer is in an explicit trusted-proxy list; only then parse forwarding headers from right to left, ignoring untrusted client-supplied prefixes. Bound limiter-key storage and prune stale entries. Add an active-session capacity of 10,000 by default; reject creation when full without allocating partial state. Initial thresholds/capacity require owner approval and load/abuse review.
+- Username validation proposal: trim Go Unicode whitespace, reject invalid UTF-8 and C0/C1 control characters, then count extended grapheme clusters. Preserve all otherwise-safe Unicode and render usernames as escaped text inside a bidirectional isolation element (`<bdi dir="auto">`) in the web UI. Keep examples for Thai combining sequences, joined emoji, Arabic, and literal `<script>` text. Do not treat markup characters as executable content or reject them solely by spelling.
+- Grapheme dependency candidate: `github.com/clipperhouse/uax29/v2/graphemes` at v2.7.0. The package documents Unicode 17 grapheme rules, official Unicode test-suite use, and an MIT license; confirm the exact source/revision and dependency graph at implementation time. Do not install it until the specification and dependency review are approved.
 - Start with process-local storage; no persistence or distributed session dependency.
 
 ## Security and privacy
@@ -95,11 +98,17 @@ Create and recover an anonymous player identity without login, validate the play
 
 ## Test plan
 
-- Go unit tests for username grapheme policy, uniqueness, credential generation, expiry, revocation, constant-time verifier use where testable, capacity/failure behavior, and race-safe concurrent access.
-- HTTP tests for endpoint status/error mapping, request limits, cookie flags, no-cookie-on-error, Origin policy, and credential absence from response bodies/log hooks.
+- Go unit tests for username grapheme policy, unique guest IDs, credential generation, expiry/revocation, capacity/failure behavior, limiter boundary/source parsing, and race-safe concurrent access. Include known UAX #29 vectors for Thai combining sequences, emoji joined by ZWJ, regional-indicator flags, Arabic, and Unicode 17 test data where useful; invalid UTF-8 and C0/C1 controls reject. Literal `<script>`-like text remains accepted as a username and must render inertly as text.
+- HTTP tests for endpoint status/error mapping, 4 KiB request-body limit, cookie flags, no-cookie-on-error, Origin and Fetch Metadata behavior, limiter before body parsing/session allocation, expired-cookie clearing, and credential absence from response bodies/log hooks.
 - Frontend tests for username input, Thai errors, create/recovery bootstrap, refresh restoration, and localStorage containing display name only.
 - Security checks for dependency audit and static analysis; `pnpm check` and exact-head CI. Verify the session-creation limiter before authentication and confirm excess attempts allocate no sessions.
 - Independent review inspects the implementation diff, specs, tests, actual results, and final SHA.
+
+## T01 design proposal and approval
+
+The following defaults are proposals, not confirmed product requirements. Project Owner approval is required before implementation: 24-hour absolute session expiry; 256-bit cookie credential and SHA-256 verifier; production `__Host-pp_guest` Secure/HttpOnly/SameSite=Lax cookie; 10 session-creation attempts per minute per trusted source IP; 10,000 active sessions per server process; and the exact control-character policy. The API shapes, Unicode 17 grapheme implementation candidate, error codes, and local development proxy are technical recommendations subject to independent design review. Public session creation remains unavailable until the limiter and capacity behavior are implemented and tested.
+
+Security references reviewed 2026-10-19: [OWASP Session Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html), [OWASP CSRF Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html), and the official [`crypto/rand` documentation](https://pkg.go.dev/crypto/rand). The grapheme dependency candidate is documented at [pkg.go.dev](https://pkg.go.dev/github.com/clipperhouse/uax29/v2/graphemes) and its [version-pinned repository](https://github.com/clipperhouse/uax29/tree/v2.7.0).
 
 ## Dependencies and risks
 
@@ -107,12 +116,13 @@ Create and recover an anonymous player identity without login, validate the play
 - W009 consumes authenticated guest identity and introduces per-Room username uniqueness. W010 consumes session authorization for WebSocket establishment.
 - Username grapheme counting is not equivalent to Go rune count or UTF-16 length; dependency quality and test vectors matter.
 - In-memory sessions disappear on restart and are single-server only, consistent with MVP architecture but a deliberate limitation.
-- Cookie lifetime, SameSite, credential format/length, revocation behavior, and endpoint schema are technical decisions; the cookie lifetime and production policy need Project Owner approval before implementation if they change user-visible recovery expectations.
+- Approval is still required for the proposed cookie lifetime, SameSite, credential format, rate limit/capacity defaults, and Unicode control policy before implementation. The package candidate may be replaced after version/license/security review.
 
 ## Specification review history
 
 Review 1 at `8391d663f7176e1fddd64829f00ca18ba69e062d`: FAIL with W008-SR-01 (MAJOR, username allowlist ambiguity) and W008-SR-02 (MINOR, no interim unauthenticated session-creation limit). Remediation clarifies acceptance of other safe Unicode text and adds a configurable rate-limit requirement and public-exposure gate.
 - Review 2: PASS at specification revision `675f770f25583edd4bf9d149e53986b689172573`; both findings resolved, no new BLOCKER/MAJOR/MINOR findings. Reviewer recommends that T01 define unsafe Unicode/rendering test vectors without rejecting safe scripts. Full report: `docs/development/reviews/W008-review.md`.
+- Review 3: pending independent review of the expanded, detailed technical design.
 - Project Owner approval of the specification and proposed session policy is pending; implementation has not started.
 
 ## Implementation validation evidence

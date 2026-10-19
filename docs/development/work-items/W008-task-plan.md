@@ -1,13 +1,13 @@
 # Task Plan — W008: Guest Session
 
-Specification: `docs/development/work-items/W008-guest-session.md` (SPEC_READY; Project Owner approval required before implementation)
+Specification: `docs/development/work-items/W008-guest-session.md` (READY_FOR_REVIEW; Project Owner approval required before implementation)
 Branch: `feature/W008-guest-session`
 
 | Task | Change | Requirement / acceptance refs | Deliverable | Validation |
 |---|---|---|---|---|
-| T01 | Finalize session API, cookie, expiry, verifier, Origin/CSRF, Unicode dependency, and unauthenticated session-creation rate-limit decisions | §6.1–6.7, §20 SEC-006, W008-AC-04–07, 09 | Approved technical design and ADR if a material architecture decision is made | Independent design review; documented owner approval for material user-facing/security policy decisions; endpoint exposure blocked until rate-limit policy and tests are specified |
-| T02 | Implement pure guest-session domain and username validator | FR-001–003, W008-AC-01–02, 06–07 | `apps/server/internal/session/` | Unit, Unicode boundary, concurrency/race tests; `go test`, `go vet` |
-| T03 | Add session HTTP creation and recovery adapter | FR-003, FR-007, W008-AC-03–07 | Versioned HTTP endpoints, cookie policy, API errors | HTTP tests for attributes, Origin, limits, no credential leakage; security review |
+| T01 | Review proposed API, cookie, expiry, verifier, Origin/CSRF, Unicode dependency, and limiter details; obtain Project Owner approval | §6.1–6.7, §20 SEC-006, W008-AC-04–07, 09 | Approved technical design and ADR if a material architecture decision is made | Independent design review; documented owner approval for proposed policy values; endpoint exposure blocked until limiter and capacity behavior are tested |
+| T02 | Implement pure guest-session domain, expiry, credential verifier, limiter/capacity interfaces, and username validator | FR-001–003, W008-AC-01–02, 06–07, 09 | `apps/server/internal/session/` | Unit, Unicode 17 boundary, limiter, capacity, concurrency/race tests; `go test`, `go vet` |
+| T03 | Add same-origin HTTP session creation and recovery adapter with secure cookies | FR-003, FR-007, §20 SEC-006, W008-AC-03–07, 09 | Versioned HTTP endpoints, cookie policy, API errors, Vite `/api` proxy | HTTP tests for attributes, Origin, Fetch Metadata, limits, no credential leakage; security review |
 | T04 | Add Thai client username entry and session bootstrap/recovery | FR-001–004, W008-AC-08 | React entry and recovery flow; display-name persistence only | Frontend component/state tests; browser refresh/session behavior |
 | T05 | Integrate docs, validation and evidence; request exact-head independent review | W008-AC-09–10 | Implementation report and PR evidence | `pnpm check`, CI/security checks, independent review PASS and re-review after material fixes |
 
