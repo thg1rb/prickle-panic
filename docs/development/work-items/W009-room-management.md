@@ -33,7 +33,7 @@ Last updated: 2026-10-19
 
 - `docs/REQUIREMENT.md` §§3.1–3.2 (MVP and post-MVP scope), §§6.4–6.7 (Guest Session, RoomPlayer identity, username changes), §§7.1–7.15 (Room rules), §§12.2–12.3 (start validation/countdown), §§13.1–13.8 (reconnection/leave boundaries), §§14.2, 14.4, 14.6–14.7 (authority, limits, Host and Room abuse), §§15 (EC-003–015 and related cases), §§16.1–16.2 (FR-005–023), §19.5 (stable errors), §20 (security), §21 (invariants), §§22–25 (architecture/concurrency/security), §28 (AC-002–005), §32 (W009).
 - W005 contract: `docs/protocol/v1/README.md` and `message.schema.json` (strict v1 envelope and Room snapshot contract; currently lacks several W009 commands and Lobby fields).
-- W008 boundary: `docs/development/work-items/W008-guest-session.md` (currently reviewed but still awaiting Project Owner approval and merge). W009 consumes an authenticated session principal; it does not accept caller-supplied Guest IDs.
+- W008 boundary: `docs/development/work-items/W008-guest-session.md` and its Owner-approved policy/source revision `cd37fb4096b1da295d7736985979b382f008bcf6` (PR #10; policy decisions approved 2026-10-19; final independent review and merge remain pending). W009 consumes an authenticated session principal; it does not accept caller-supplied Guest IDs.
 - Status fidelity: Room Management is BASELINE (§40). Six-character Room Code is an INITIAL PROPOSAL (§7.2), Room expiry values are TUNING (§7.15), and protocol extensions/capabilities described below are design recommendations pending review. The Project Owner has approved the W008 username comparison and initial configurable create/join limit baselines; integration and abuse testing remain required.
 
 ## Expected behavior
@@ -101,7 +101,7 @@ Last updated: 2026-10-19
 - Host migration uses monotonic join order, with a deterministic tie-breaker for any implementation-level equal order. Voluntary leave is immediate. Unexpected disconnect marks the Host unavailable and signals W013; W013's grace-period completion authorizes migration. If no eligible participant remains, follow the approved empty-Room lifecycle.
 - Protocol v1 currently has `room.create`, `room.join`, `room.leave`, `room.set_ready`, and `match.start`, but lacks Host operations, Room state/mode/settings/lock metadata, invitation URL output, `room.change_username`, and `match.cancel_countdown`/countdown-cancelled event. W009 should add explicit strict schema branches and fixtures for required commands/events/errors before transport implementation; don't overload existing messages or accept arbitrary extra fields. W010 will bind them to WebSocket routing. Review compatibility under W005's strict v1 policy; deployment is coordinated, and no live users are assumed without verification.
 - Frontend organization should add a Room feature for create/join/invitation route/Lobby, consume a typed Room API/store, and project it into React components. React owns Lobby UI state; Phaser remains isolated to gameplay and receives no Room authority. Keep route destination across guest bootstrap. Render usernames as text in bidi isolation, provide accessible Thai labels, focus states, and touch-sized actions.
-- W008 remains pending owner approval at the time of this specification. Its proposed session expiration, cookie, username safety filter, and credential design are not treated as confirmed here. W009 requires only the approved authenticated session principal and stable session identity contract; if W008 changes, re-review this boundary before implementation.
+- W008 policy decisions are Owner-approved and are recorded in the referenced source revision above; PR #10 remains open pending exact-revision review and integration. W009 consumes the approved authenticated session principal and stable session identity contract. Reconcile any further W008 review changes before implementation.
 
 ## Security and privacy
 
@@ -122,15 +122,15 @@ Last updated: 2026-10-19
 
 ## Dependencies and risks
 
-- W005 Protocol Contracts (DONE) provides strict envelope/schema rules; W008 Guest Session is reviewed but owner approval and merge are still pending.
+- W005 Protocol Contracts (DONE) provides strict envelope/schema rules; W008 policy is approved, while PR #10 final review and merge remain pending.
 - W010 consumes Room APIs and provides active connection/presence, event delivery, network backpressure, FR-008 one-active-connection enforcement per RoomPlayer, and INV-004 one-active-Room-connection enforcement across the Guest Session. Replacing a connection must revoke the old connection's authority and notify W013 using the unexpected-disconnect path.
 - W011/W012 own Match coordination and state transitions; W013 owns unexpected-disconnect grace periods, forfeit, and delayed Host migration.
-- Major design risks: room code entropy/collision handling under high load; multi-index atomicity; Room event queue lifecycle/leaks; undefined username equality; unspecified Host-editable settings; protocol v1 field evolution; interactions between kick, rejoin, and guest identity; and in-memory loss at restart.
-- Decisions requiring Project Owner approval before implementation: duplicate-username equality/canonicalization; whether the six-character code proposal is approved; the permitted Host-editable Speed Battle setting list; whether a Host can unlock a locked Room; and whether a Room with no remaining members closes immediately. Keep all such recommendations marked PROPOSED until decided.
+- Major design risks: Room code entropy/collision handling under high load; multi-index atomicity; Room event queue lifecycle/leaks; unspecified Host-editable settings; protocol v1 field evolution; interactions between kick, rejoin, and guest identity; and in-memory loss at restart.
+- Decisions requiring Project Owner approval before implementation: whether the six-character code proposal is approved; the permitted Host-editable Speed Battle setting list; whether a Host can unlock a locked Room; and whether a Room with no remaining members closes immediately. The duplicate comparison policy and initial create/join limits are approved as recorded in §6.2/§14.4 and above. Keep undecided recommendations marked PROPOSED.
 
 ## Approval
 
 - Project Owner / authorized approver: Pending
 - Independent specification review: PASS at `48d7d76f0fafa545d72938942c2d5e400a0ad4ed`, recorded in `docs/development/reviews/W009-review.md`
 - Decision and date: Pending
-- W008 dependency approval/merge: Pending
+- W008 policy approval: Approved 2026-10-19; PR #10 final review/merge: Pending
