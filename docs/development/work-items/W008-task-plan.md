@@ -39,5 +39,7 @@ Branch: `feature/W008-guest-session-design` (T01 design only; based on develop a
 - [ ] Trusted-proxy source resolution and successful-allocation-only rolling session quota are explicit and testable.
 - [ ] Username validation order, Unicode cases, and W009 duplicate-key boundary are explicit and preserve §6.2.
 - [ ] W008-to-W010/W013 expiry event ownership, ordering, idempotency, and deadline tie behavior are explicit without circular dependencies.
+- [ ] Proactive session expiry emits the event at the authoritative deadline without requiring a later request or active socket; scheduler state is bounded by active sessions and shuts down cleanly.
 - [ ] Selected NFC/grapheme dependency versions, licenses, source, and implementation-time checks are recorded; no dependency is installed during T01.
+- [ ] Owner approval of equal-time Match-deadline precedence is recorded and flagged for synchronization into W013 before its implementation.
 - [ ] Independent reviewer PASS covers the final design revision; T02 implementation has not started.
