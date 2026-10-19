@@ -13,7 +13,7 @@ Branch: `feature/W012-results-rematch-spec`
 
 ## Dependencies
 
-- W009 Room Management, W010 WebSocket Foundation, W011 Multiplayer Speed Battle and W013 Reconnection & Anti-Griefing approved and merged before implementation; W013 is ordered after W012 in the baseline roadmap, so W012 implementation must wait for it (or the owner-approved roadmap must reorder/split the work).
+- W009 Room Management, W010 WebSocket Foundation, W011 Multiplayer Speed Battle and W013 Reconnection & Anti-Griefing approved and integrated before implementation. Specification review may occur in parallel, but implementation/integration order places W013 before W012 because W012 consumes W013's final eligibility/forfeit state.
 - W005 Protocol Contracts (DONE); W006 Card Matching Engine (DONE); W007 local prototype (DONE); W008 Guest Session approved and merged.
 
 ## Out of scope

@@ -32,7 +32,7 @@ Last updated: 2026-10-19
 
 - `docs/REQUIREMENT.md` §§3.1 (MVP Results/Rematch), §§7.5–7.9 (Room state, Host/readiness), §§9.10–9.11 (end conditions/winners), §§12.1 and 12.5–12.8 (Match state, completion, Results, Rematch), §§13.2–13.7 (eligibility/forfeit interactions), §§14.2–14.3 (server authority/idempotency), §15 EC-034–040 and EC-050, §§16.7 (FR-074–076), §17 INV-010/011/014/015/016/018, §§18–20 (server authority, transport, security), §§21–25 (invariants, tests, UX/security), §28 AC-020–022, §32 W012.
 - W011 Multiplayer Speed Battle (specification in PR #13): provides final authoritative score/state and completion/cancellation reason; not yet owner-approved/merged.
-- W013 Reconnection & Anti-Griefing: provides final eligibility/forfeit status; not yet specified/approved/implemented.
+- W013 Reconnection & Anti-Griefing is specified and has independent specification review evidence; its remaining owner decisions and integration are pending. W013 supplies final eligibility/forfeit status, including the approved immediate active-Match forfeit on W008 session expiry, distinct from the 15-second unexpected-network grace.
 - W009/W010 provide Room Lobby transitions and transport events; proposals remain in open PRs #11–12 and are not treated as approved contracts.
 - Status fidelity: highest eligible score wins; ties are allowed and use shared placement (§9.11, BASELINE Speed Battle). Rematch reset/preserve rules in §12.8 are confirmed behavior within the BASELINE lifecycle. Which button/request triggers a Room-wide return to Lobby and how forfeited players are ranked/displayed are not fully specified and remain explicit decisions below.
 
@@ -63,7 +63,7 @@ Last updated: 2026-10-19
 - Duplicate, stale, or mismatched completion event (wrong Room/Match ID, already finalized, partial participant list): ignore/reject as technical error and preserve existing terminal snapshot; do not calculate alternate winners.
 - Two Match completion triggers race (timer and last eligible player): W011/Room serialization emits one terminal state; W012 uses compare-and-transition/idempotency so result finalization occurs once.
 - Equal top score: all eligible tied players are joint winners with equal rank; following ranks skip tied positions (1,1,3).
-- All players forfeited: display no winner and all forfeited statuses. One eligible player after W013 resolution: that player wins, even if Match ended early for eligibility reasons.
+- All players forfeited: display no winner and all forfeited statuses. One eligible player after W013 resolution: that player wins, even if Match ended early for eligibility reasons. W012 consumes session-expiry forfeits through the same version-correlated final eligibility projection and does not infer or delay them using network grace.
 - Player in reconnect grace remains eligible until W013 resolves; do not declare early winner while a competitor can reconnect under the applicable policy.
 - Cancelled Match: no winner and a Thai recoverable result/cancellation message; no rematch state may reuse the cancelled Match ID.
 - Rematch request from an unauthorized session, nonmember, or invalid Room state is rejected; no partial reset. Exact caller eligibility for the Room-wide transition follows the owner-approved trigger policy.
@@ -109,7 +109,7 @@ Last updated: 2026-10-19
 ## Test plan
 
 - Go unit tests for deterministic ranking, top ties, shared placement, forfeited exclusion, no eligible winner, cancellation/no-winner, immutable projections, and malformed/inconsistent terminal input.
-- Integration tests for W011 completion event exactly once, W013 eligibility changes at and before the completion boundary, active grace preventing premature winner, version-correlated terminal snapshots, Results state transition, W009 Room reset preservation, W010 duplicate/rematch request handling, and Room closure cleanup.
+- Integration tests for W011 completion event exactly once, W013 eligibility changes at and before the completion boundary (including immediate session-expiry forfeit without network grace), active network grace preventing premature winner, version-correlated terminal snapshots, Results state transition, W009 Room reset preservation, W010 duplicate/rematch request handling, and Room closure cleanup.
 - Frontend component tests for Thai rank/tie/winner/forfeit/no-winner/error/loading UI, safe username rendering, accessible semantics, and authoritative navigation only after server response.
 - Browser E2E with 2–6 clients covers timer end, score/result consistency, ties, forfeit, Results display, Room state return, readiness reset, starting a new Match with new ID and reset state, plus mobile viewport.
 - Run `pnpm check`, protocol fixtures, Go tests/race/vet, CI/security checks, and record actual results per criterion. Browser/E2E environment limitations must be NOT_RUN/BLOCKED with evidence, not implied pass.
