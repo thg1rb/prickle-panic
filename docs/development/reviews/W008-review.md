@@ -147,3 +147,29 @@ PASS. The owner-approved username rules, 24-hour idle and 7-day absolute session
 - Reviewer execution reference: Independent read-only Sub-Agent (`/root/w008_spec_review`)
 - Scope: Consistency of W008 specification/task-plan state with exact-revision independent review evidence and pending integration status.
 - Decision: PASS. Both documents identify the specification as `SPEC_READY`; the policy/specification PASS and scope review PASS support that state, and PR #10 integration remains explicitly pending. No new findings. This status-only review does not authorize merge or implementation.
+
+## Review 8 — T01 technical design
+
+- Pull Request: W008 T01 design PR (opened after this report is recorded)
+- Final reviewed commit SHA: `3d9ed43a3215f339e19f10464aaedfa241f866f8`
+- Reviewer execution reference: Independent read-only Sub-Agent (`/root/w008_spec_review`)
+- Review type: Exact-revision W008 technical design and task-plan review, including two remediation re-reviews
+
+### Evidence inspected
+
+- `docs/REQUIREMENT.md` §§6.2, 6.5, 13.1–13.5, and 14.4
+- `docs/agents/workflow.md`
+- W008 specification and task-plan changes from the T01 branch
+- W010, W011, and W013 session-expiry and Match-deadline contracts
+
+### Review rounds and remediation
+
+1. Review 8 at `d062b87fb88ad7e695af2013b3989d725c87dfd3`: FAIL with two MAJOR findings and one MINOR finding. The equal-time Match-deadline policy needed traceable Owner approval; expiry-event delivery needed a proactive trigger when no request or socket exists; and the grapheme module/package paths needed to be distinguished.
+2. Review 9 at `b286294803d8287b0d5b8fceb016ec26af940bd2`: FAIL with one MAJOR finding. UTC session-expiry timestamps and monotonic Match deadlines lacked a common ordering basis. The reviewer confirmed the three prior findings were resolved.
+3. Review 10 at `3d9ed43a3215f339e19f10464aaedfa241f866f8`: PASS with no findings. The design now uses one injected monotonic clock domain for expiry and Match deadlines. Expiry events carry a monotonic `DeadlineTick` for ordering and UTC time for diagnostics. Delayed delivery, wall-clock adjustments, no-request/no-socket expiry, and exact-deadline ties are included in the test plan.
+
+Other remediation details: W008 records the Owner-approved Match-deadline precedence and requires W013 specification synchronization before its implementation; specifies a proactive indexed scheduler with one deadline entry per active session; and distinguishes Go module and package paths.
+
+### Final decision
+
+PASS at commit `3d9ed43a3215f339e19f10464aaedfa241f866f8`. The final review confirmed the approved W008 policy, API, cookie, proxy, quota, Unicode, and W008/W010/W013 integration boundaries. This is a design review only; no guest-session implementation or implementation tests were reviewed or run. T02 has not started. PASS does not authorize T01 PR merge.

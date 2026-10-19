@@ -1,6 +1,6 @@
 # Task Plan — W008: Guest Session
 
-Specification: `docs/development/work-items/W008-guest-session.md` (SPEC_READY; approved policy integrated by PR #10; T01 design under independent review)
+Specification: `docs/development/work-items/W008-guest-session.md` (SPEC_READY; approved policy integrated by PR #10; T01 design PASS at `3d9ed43a3215f339e19f10464aaedfa241f866f8`; T01 PR integration pending)
 Branch: `feature/W008-guest-session-design` (T01 design only; based on develop after PR #10)
 
 | Task | Change | Requirement / acceptance refs | Deliverable | Validation |
@@ -34,13 +34,13 @@ Branch: `feature/W008-guest-session-design` (T01 design only; based on develop a
 
 ## T01 design acceptance
 
-- [ ] HTTP request/response, status/error, cookie, reuse, and Origin contract is explicit.
-- [ ] Credential lifecycle, effective expiration, qualifying activity, invalidation, and cleanup are explicit and preserve §6.5.
-- [ ] Trusted-proxy source resolution and successful-allocation-only rolling session quota are explicit and testable.
-- [ ] Username validation order, Unicode cases, and W009 duplicate-key boundary are explicit and preserve §6.2.
-- [ ] W008-to-W010/W013 expiry event ownership, ordering, idempotency, and deadline tie behavior are explicit without circular dependencies.
-- [ ] Session expiry and Match deadlines share one monotonic clock domain; UTC remains diagnostic, with wall-clock adjustment and delayed-delivery boundary tests specified.
-- [ ] Proactive session expiry emits the event at the authoritative deadline without requiring a later request or active socket; scheduler state is bounded by active sessions and shuts down cleanly.
-- [ ] Selected NFC/grapheme dependency versions, licenses, source, and implementation-time checks are recorded; no dependency is installed during T01.
-- [ ] Owner approval of equal-time Match-deadline precedence is recorded and flagged for synchronization into W013 before its implementation.
-- [ ] Independent reviewer PASS covers the final design revision; T02 implementation has not started.
+- [x] HTTP request/response, status/error, cookie, reuse, and Origin contract is explicit.
+- [x] Credential lifecycle, effective expiration, qualifying activity, invalidation, and cleanup are explicit and preserve §6.5.
+- [x] Trusted-proxy source resolution and successful-allocation-only rolling session quota are explicit and testable.
+- [x] Username validation order, Unicode cases, and W009 duplicate-key boundary are explicit and preserve §6.2.
+- [x] W008-to-W010/W013 expiry event ownership, ordering, idempotency, and deadline tie behavior are explicit without circular dependencies.
+- [x] Session expiry and Match deadlines share one monotonic clock domain; UTC remains diagnostic, with wall-clock adjustment and delayed-delivery boundary tests specified.
+- [x] Proactive session expiry emits the event at the authoritative deadline without requiring a later request or active socket; scheduler state is bounded by active sessions and shuts down cleanly.
+- [x] Selected NFC/grapheme dependency versions, licenses, source, and implementation-time checks are recorded; no dependency is installed during T01.
+- [x] Owner approval of equal-time Match-deadline precedence is recorded and flagged for synchronization into W013 before its implementation.
+- [x] Independent reviewer PASS covers the final design revision; T02 implementation has not started.
