@@ -56,3 +56,12 @@ The reviewer confirmed that the included requirement source contains the approve
 ### Final decision
 
 PASS. This review applies to specification revision `e406acdad9fc7a8f992aa6bbfba349be1e335981`; it does not authorize merge or implementation.
+
+## Review 3 — Roadmap dependency reconciliation
+
+- Pull Request: #15
+- Reviewed PR head: `797408f8f420f95e7b9cec32d7af24c673fa7132`
+- Reviewer execution reference: Independent read-only Sub-Agent (`/root/w008_spec_review`)
+- Scope: Roadmap dependencies and consistency with W012's use of W013 final eligibility/forfeit state; checked preservation of session-expiry and network-grace behavior.
+- Findings: None.
+- Decision: PASS. The roadmap places W013 before W012 and identifies W008–W011 prerequisites; W012 depends on W013. The W013 policy still applies immediate forfeit to active-Match session expiry and the 15-second grace only to unexpected network loss. No implementation or tests were reviewed or run. This review does not authorize merge.
