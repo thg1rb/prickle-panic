@@ -1,0 +1,12 @@
+{
+  "v": 1,
+  "type": "game.action.result",
+  "requestId": "req-pick-001",
+  "seq": 5,
+  "payload": {
+    "matchId": "match-001",
+    "accepted": true,
+    "boardVersion": 19,
+    "referenceVersion": 8
+  }
+}

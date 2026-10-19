@@ -1,0 +1,6 @@
+{
+  "v": 1,
+  "type": "state.request_snapshot",
+  "requestId": "req-snapshot-001",
+  "payload": { "afterSeq": 42 }
+}

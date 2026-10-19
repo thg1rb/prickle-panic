@@ -1,0 +1,24 @@
+{
+  "v": 1,
+  "type": "room.snapshot",
+  "seq": 1,
+  "payload": {
+    "roomId": "room-001",
+    "roomCode": "K7P2MX",
+    "hostPlayerId": "player-001",
+    "players": [
+      {
+        "playerId": "player-001",
+        "username": "Coco",
+        "ready": true,
+        "isHost": true
+      },
+      {
+        "playerId": "player-002",
+        "username": "Hedgehog",
+        "ready": false,
+        "isHost": false
+      }
+    ]
+  }
+}

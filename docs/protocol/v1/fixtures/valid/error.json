@@ -1,0 +1,6 @@
+{
+  "v": 1,
+  "type": "error",
+  "requestId": "req-pick-001",
+  "payload": { "code": "STALE_ACTION", "retryable": true }
+}

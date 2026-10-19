@@ -1,0 +1,7 @@
+{
+  "v": 1,
+  "type": "room.join",
+  "requestId": "req-join-002",
+  "unexpected": true,
+  "payload": { "roomCode": "K7P2MX" }
+}

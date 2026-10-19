@@ -1,0 +1,11 @@
+{
+  "v": 1,
+  "type": "game.started",
+  "seq": 3,
+  "payload": {
+    "matchId": "match-001",
+    "mode": "speed_battle",
+    "startedAt": "2026-10-19T05:00:00Z",
+    "endsAt": "2026-10-19T05:01:00Z"
+  }
+}

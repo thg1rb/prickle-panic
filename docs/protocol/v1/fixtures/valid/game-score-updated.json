@@ -1,0 +1,12 @@
+{
+  "v": 1,
+  "type": "game.score.updated",
+  "seq": 6,
+  "payload": {
+    "matchId": "match-001",
+    "scores": [
+      { "playerId": "player-001", "score": 25 },
+      { "playerId": "player-002", "score": 20 }
+    ]
+  }
+}

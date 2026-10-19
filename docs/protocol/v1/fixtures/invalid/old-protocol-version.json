@@ -1,0 +1,6 @@
+{
+  "v": 2,
+  "type": "room.create",
+  "requestId": "req-create-002",
+  "payload": {}
+}

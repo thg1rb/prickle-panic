@@ -1,6 +1,6 @@
 # W004 — Development Standards & CI
 
-Status: READY_FOR_REVIEW
+Status: DONE
 Type: Foundation
 
 ## Goal
@@ -50,3 +50,10 @@ The TypeScript compiler baseline is TypeScript 7.0.2. The current `typescript-es
 ## Completion
 
 Require all applicable local checks to pass, independent review PASS for the exact PR revision, blocking findings resolved, PR merged to `develop`, and feature branch retained.
+
+## Completion evidence
+
+- Independent review: PASS for `b694079db3d8b4c2e31950e9af3c6e4f6ebea55a`, recorded in PR #4; finding W004-R1 was resolved by adding the formal W003 review report.
+- PR #4 merged to `develop` as merge commit `34dfa217fbc8be37019633e14cf4370ead86286e` on 2026-10-19; feature branch retained.
+- GitHub Actions `CI / validate` passed on the PR revision (run 39202189624) and the integration merge (run 39202274671).
+- GitHub branch protection for `develop` and `main` now requires the observed `validate` check with strict up-to-date branches, preserves PR/conversation requirements, and prohibits force-push and deletion.
