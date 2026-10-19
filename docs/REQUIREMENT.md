@@ -638,23 +638,24 @@ Initial username policy:
 
 | Rule | Value |
 |---|---|
-| Minimum Length | 2 visible characters |
-| Maximum Length | 16 visible characters |
-| Thai | Allowed |
-| English | Allowed |
-| Numbers | Allowed |
-| Internal Spaces | Allowed |
+| Minimum Length | 2 Unicode extended grapheme clusters |
+| Maximum Length | 16 Unicode extended grapheme clusters |
+| Normalization | NFC after trimming surrounding whitespace |
+| Allowed characters | Thai letters with valid associated Thai marks, English letters, ASCII digits, Thai digits, and single internal ASCII spaces |
 | Duplicate in Same Room | Not Allowed |
 | Duplicate Across Rooms | Allowed |
 
-Length validation should use Unicode grapheme clusters.
+The server must reject empty or whitespace-only values, controls, newlines,
+tabs, invisible format and zero-width controls, bidirectional controls,
+standalone or malformed combining marks, emoji, unsupported scripts,
+unsupported punctuation, markup, and overlong raw input. The raw input byte
+limit is 256 bytes before normalization. Thai marks associated with valid
+Thai letters remain permitted. The server is authoritative. The frontend
+must render usernames as text, never markup.
 
-Leading and trailing whitespace should be removed.
-
-Empty or whitespace-only usernames are invalid.
-
-The server must prevent unsafe control characters
-and potentially harmful text rendering.
+For same-Room duplicate detection, compare a normalized key that treats
+English letters case-insensitively while preserving the NFC display casing.
+Usernames are display names and are never authentication credentials.
 
 ## 6.3 Username Persistence
 
@@ -676,15 +677,48 @@ Guest identity and display username must be separate.
 
 Guest sessions must use unpredictable session credentials.
 
-The recommended baseline is a server-issued session
-using a secure HttpOnly cookie.
+The server must issue an opaque credential containing at least 256 bits of
+cryptographically secure randomness. It must not encode identity or sensitive
+information, be derived from a username or timestamp, be logged, exposed in a
+URL, or stored in localStorage. The server should store a cryptographic hash
+of the credential and must support server-side invalidation. Reconnecting a
+WebSocket must not rotate the credential.
 
-Production cookies should use:
+Session state is in memory for MVP; recovery across a server restart is not
+guaranteed. The configurable inactivity timeout is 24 hours since the last
+qualifying authenticated application activity, and the configurable absolute
+lifetime is 7 days from creation. The earlier deadline expires the session.
+Successful authenticated application activity and explicit session recovery
+qualify; WebSocket ping/pong, passive snapshots, background heartbeats, and
+failed requests do not. Expiration revokes authorization consistently for
+HTTP and WebSocket actions. It is separate from the 15-second Match network
+reconnection grace period; if the session expires during an active Match,
+authorization is revoked and the player immediately forfeits without that
+network grace period.
+
+Production cookie name is `__Host-prickle_guest`, with:
 
 - HttpOnly
 - Secure
-- Appropriate SameSite policy
-- Explicit expiration
+- SameSite=Lax
+- Path=/
+- No Domain attribute
+- Max-Age consistent with the 7-day absolute lifetime
+
+Local HTTP development must use an explicit development-only cookie
+configuration and must not weaken the production policy. Production uses
+HTTPS/WSS. Cookie-authenticated WebSockets require strict Origin validation
+and message-level authorization; SameSite is not the sole CSRF or WebSocket
+security boundary.
+
+Create no more than 10 new Guest Sessions per 10 minutes per source IP as
+the configurable initial baseline. Reuse an existing valid session on page
+refresh. Apply the limit server-side and return a rate-limit response.
+Room creation is initially limited to 5 attempts per 10 minutes per Guest
+Session and joining to 20 attempts per minute per Guest Session. Additional
+network-source controls may mitigate repeated session creation; IP addresses
+are not permanent player identities. Limits require integration and abuse
+testing and must avoid unfairly blocking shared networks.
 
 The server must validate the session before authorizing
 room and gameplay actions.
