@@ -1,6 +1,6 @@
 # W008 — Guest Session
 
-Status: SPEC_READY
+Status: READY_FOR_REVIEW
 Type: Backend and Frontend Feature
 
 ## Goal
@@ -11,7 +11,7 @@ Create and recover an anonymous player identity without login, validate the play
 
 - Add a Go Guest Session module with opaque guest identity, cryptographically generated session credentials, explicit expiry, and in-memory active session storage for the MVP process lifetime.
 - Add HTTP session creation and recovery endpoints; creation accepts the initial username and sets the credential in an HttpOnly cookie. Recovery reads the cookie and returns only the authorized guest identity and display username.
-- Validate usernames on the server: trim leading/trailing whitespace; require 2–16 Unicode grapheme clusters after trimming; permit Thai, English, numbers, and internal spaces; reject empty values, control characters, and values unsafe for text rendering. Duplicate-in-Room checks belong to W009 when Room membership exists.
+- Validate usernames on the server: trim leading/trailing whitespace; require 2–16 Unicode grapheme clusters after trimming; accept Thai, English, numbers, and internal spaces as explicitly required without treating this list as an exclusive allowlist; accept other safe Unicode text too; reject empty values, unsafe control characters, and values unsafe for text rendering. Duplicate-in-Room checks belong to W009 when Room membership exists.
 - Keep guest identity separate from username. Do not use username as a credential or expose the credential in JSON, logs, browser storage, URLs, or errors.
 - Let the client remember only the last display username in localStorage, create a session after valid submission, and restore an existing session after refresh through the recovery endpoint. Add Thai UI copy for validation, expiry, and service failures.
 - Define testable interfaces so W009 and W010 can authorize Room and WebSocket actions from the same session manager.
@@ -22,7 +22,7 @@ Create and recover an anonymous player identity without login, validate the play
 - Accounts, email, passwords, social login, durable database storage, or cross-device identity.
 - Room membership, same-Room duplicate username checks, Lobby username changes, host authority, or Room actions (W009).
 - WebSocket connection management, single-active-connection enforcement, reconnection handoff, or gameplay authorization (W010/W013).
-- Rate limiting and broader abuse controls beyond safe request bounds and session-creation resource limits; W013 owns policy and enforcement.
+- Broader abuse controls and later rate-limit tuning; W013 owns those. W008 must include protective session-creation rate limiting before public endpoint exposure.
 - Changes to confirmed username/session requirements or production session expiration policy.
 
 ## Requirement references
@@ -42,7 +42,7 @@ Create and recover an anonymous player identity without login, validate the play
 
 ## Business rules
 
-- Apply the authoritative username policy in §6.2 exactly: 2–16 visible characters using Unicode grapheme clusters, Thai/English/numbers permitted, internal spaces permitted, outer whitespace trimmed, no empty/whitespace-only username, and no unsafe control characters or harmful text rendering.
+- Apply the authoritative username policy in §6.2 exactly: 2–16 visible characters using Unicode grapheme clusters, Thai/English/numbers and internal spaces explicitly permitted, outer whitespace trimmed, no empty/whitespace-only username, and no unsafe control characters or harmful text rendering. The listed categories are not an exclusive allowlist; other safe Unicode text must not be rejected merely because it is not listed. Render usernames as text, never markup.
 - Guest ID is unique and distinct from display username; usernames can repeat globally.
 - Raw credentials are unpredictable, server-issued, and not stored in localStorage.
 - Production cookie attributes are HttpOnly, Secure, explicit expiry, and an appropriate SameSite setting. Cookie lifetime and SameSite value remain subject to the documented policy decision below.
@@ -58,18 +58,19 @@ Create and recover an anonymous player identity without login, validate the play
 - Session store capacity or entropy-source failure: fail closed and do not issue a partial session.
 - Cross-origin session creation/recovery requests: reject disallowed origins; production deployments must use HTTPS and an explicit cookie policy. Exact CSRF and Origin behavior must be reviewed with the HTTP API design.
 - Process restart loses in-memory sessions; the client recovers as unauthenticated and can create a new guest identity. This limitation must be documented to the player through ordinary UX only if needed; it is not a server error detail.
+- Session creation is an unauthenticated sensitive operation. Apply a configurable protective rate limit at the HTTP edge that does not rely exclusively on a guest session ID; reject excess attempts without allocating sessions. The initial threshold and source signal are proposed security/tuning decisions for technical design. Do not expose the endpoint publicly until this limit and its tests are in place.
 
 ## Acceptance criteria
 
 - **W008-AC-01:** A visitor can create a guest session with a valid username without login; server issues a unique guest ID distinct from username.
-- **W008-AC-02:** Server applies the exact §6.2 trim, grapheme-count, permitted-character, and unsafe-control rules; boundary and Unicode tests cover valid/invalid examples.
+- **W008-AC-02:** Server applies the exact §6.2 trim, grapheme-count, and unsafe-control rules; Thai, English, numbers, and internal spaces are accepted, and other safe Unicode is not rejected solely by an allowlist. Boundary and Unicode tests cover valid/invalid examples.
 - **W008-AC-03:** Invalid creation returns a stable error, creates no session, and sets no credential cookie.
 - **W008-AC-04:** Session credential is cryptographically unpredictable, carried in an HttpOnly cookie, never returned in JSON, never stored in localStorage, URL, or logs, and never placed in WebSocket JSON.
 - **W008-AC-05:** Recovery after refresh returns the same guest ID and username for a valid session; invalid/expired/missing credentials are uniformly unauthenticated.
 - **W008-AC-06:** Cookie policy, expiry, credential hashing/storage, endpoint schema, and in-memory restart limitation are documented; no durable database is introduced.
 - **W008-AC-07:** Session manager APIs are isolated from HTTP/transport and testable; authorization lookup distinguishes unauthenticated from valid session without leaking secrets.
 - **W008-AC-08:** React client remembers only display username, calls create/recovery, restores or prompts appropriately, and renders all player-visible content in Thai.
-- **W008-AC-09:** Tests cover session creation/recovery/expiry/revocation, collision/failure handling, cookie attributes, username Unicode boundaries, client refresh behavior, and no credential leakage; `pnpm check` and CI pass.
+- **W008-AC-09:** Tests cover session creation/recovery/expiry/revocation, collision/failure handling, cookie attributes, unauthenticated session-creation rate limiting, username Unicode boundaries, client refresh behavior, and no credential leakage; `pnpm check` and CI pass.
 - **W008-AC-10:** Independent review PASS applies to the exact final PR commit; no BLOCKER/MAJOR findings remain, PR is merged to `develop`, feature branch retained, and evidence is recorded.
 
 ## Technical design
@@ -79,14 +80,15 @@ Create and recover an anonymous player identity without login, validate the play
 - React client: add a guest-entry bootstrap state and API client; on app startup recover session with credentials included; keep only display username in localStorage; keep no authentication secret in JS-readable storage.
 - Integration seam: Room and WebSocket layers receive an authenticated `GuestSession` value from middleware/connection setup, never a caller-supplied guest ID.
 - Use `crypto/rand`; store a keyed or one-way verifier rather than raw cookie credentials if compatible with operational revocation and expiry requirements. Keep comparison constant-time. Choose the concrete verifier and cookie name in technical design.
-- Use a well-maintained Go Unicode grapheme segmentation dependency only if the standard library cannot meet §6.2; inspect licensing, maintenance, and compatibility and pin it through Go module metadata.
+- Use a well-maintained Go Unicode grapheme segmentation dependency only if the standard library cannot meet §6.2; inspect licensing, maintenance, and compatibility and pin it through Go module metadata. Do not implement an exclusive username-script allowlist; treat names as text and reject only unsafe controls/rendering cases supported by §6.2.
+- Protect unauthenticated session creation with a configurable edge limit that works before a guest identity exists. The initial threshold and source signal remain a proposed security decision; validate spoofing and availability tradeoffs in technical design. Public exposure is gated on this protection.
 - Start with process-local storage; no persistence or distributed session dependency.
 
 ## Security and privacy
 
 - Require TLS for production; set `Secure`, `HttpOnly`, explicit `Max-Age`/expiry, and a reviewed `SameSite` value.
 - Validate Origin on session-mutating endpoints and use same-origin deployment; do not rely on SameSite alone as CSRF protection.
-- Bound request body, username bytes, session allocation, and credential generation retries.
+- Bound request body, username bytes, session allocation, credential generation retries, and unauthenticated session-creation attempts. The limiter must not rely exclusively on guest session IDs; document its source signal, proxy-trust assumptions, and spoofing/availability tradeoffs.
 - Exclude cookies, credential verifiers, and raw secrets from application logs and error responses; redact sensitive request headers in observability.
 - Do not interpret usernames as HTML. Store/display as text and reject unsafe control characters according to the source requirement.
 - Avoid claiming sessions survive process restart; no account recovery is implied.
@@ -96,7 +98,7 @@ Create and recover an anonymous player identity without login, validate the play
 - Go unit tests for username grapheme policy, uniqueness, credential generation, expiry, revocation, constant-time verifier use where testable, capacity/failure behavior, and race-safe concurrent access.
 - HTTP tests for endpoint status/error mapping, request limits, cookie flags, no-cookie-on-error, Origin policy, and credential absence from response bodies/log hooks.
 - Frontend tests for username input, Thai errors, create/recovery bootstrap, refresh restoration, and localStorage containing display name only.
-- Security checks for dependency audit and static analysis; `pnpm check` and exact-head CI.
+- Security checks for dependency audit and static analysis; `pnpm check` and exact-head CI. Verify the session-creation limiter before authentication and confirm excess attempts allocate no sessions.
 - Independent review inspects the implementation diff, specs, tests, actual results, and final SHA.
 
 ## Dependencies and risks
@@ -109,7 +111,7 @@ Create and recover an anonymous player identity without login, validate the play
 
 ## Specification review history
 
-Pending independent review.
+Review 1 at `8391d663f7176e1fddd64829f00ca18ba69e062d`: FAIL with W008-SR-01 (MAJOR, username allowlist ambiguity) and W008-SR-02 (MINOR, no interim unauthenticated session-creation limit). Remediation clarifies acceptance of other safe Unicode text and adds a configurable rate-limit requirement and public-exposure gate. Independent re-review pending.
 
 ## Implementation validation evidence
 
