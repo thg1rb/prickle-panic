@@ -26,4 +26,19 @@ The React component tests mock Phaser, and synthetic browser pointer events did 
 
 ### Remediation
 
-Pending.
+The developer moved all player-facing descriptions and remaining page copy into `apps/web/src/i18n/th.ts`. A browser check confirmed the Phaser canvas is removed on return to the home screen (canvas count changed from 1 to 0). Physical pointer/touch input remains unverified; this is retained as a MINOR finding.
+
+## Review 2
+
+- Decision: PASS
+- Reviewed implementation commit: `eaa32e7574e6daa13d0cf50bb8cf9835ef261367`
+- Pull Request: #9
+- CI run: `39209653767` — PASS
+- Reviewer: Independent Sub-Agent
+
+### Finding disposition
+
+- W007-IR-01 — RESOLVED. Card descriptions, footer, document title, and meta description now use the Thai translation module; card bit logic remains language-neutral.
+- W007-IR-02 — MINOR, OPEN. Physical pointer/touch selection remains unverified because available browser automation did not target Phaser card coordinates. Canvas cleanup was browser-verified. No BLOCKER or MAJOR findings remain.
+
+The PASS applies to the exact implementation commit above. No implementation changes were made after that review; this report and Work Item evidence are documentation-only updates.

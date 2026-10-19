@@ -1,6 +1,6 @@
 # W007 — Local Gameplay Prototype
 
-Status: READY_FOR_REVIEW
+Status: VERIFIED
 Type: Frontend Feature
 
 ## Goal
@@ -92,6 +92,13 @@ Replace the starter screen with a polished, Thai-language, single-player local S
 - Phaser canvas initialization and cleanup were observed in the browser: one canvas existed in gameplay and zero remained after returning home. Synthetic pointer events sent by the browser evaluation tool did not exercise Phaser's input path; physical mouse/touch selection remains unverified in this environment.
 - Page title, Thai document language, and meta description were verified in the browser and are populated from the Thai translation module.
 - Build emitted the expected lazy Phaser chunk at 1.37 MB uncompressed (357.33 kB gzip); Vite reports its generic 500 kB chunk advisory.
+
+## Implementation review history
+
+- Review 1: FAIL at `fbad25b330a04a1adbfada5a5a73777546832074`; W007-IR-01 (MAJOR) required all Thai display copy to be centralized; W007-IR-02 (MINOR) recorded physical pointer/touch and Phaser unmount browser QA as incomplete.
+- Remediation moved card descriptions and remaining document/home copy into `apps/web/src/i18n/th.ts`; browser QA verified canvas count 1 during gameplay and 0 after returning home. Physical pointer/touch selection remains unverified in this environment.
+- Review 2: PASS at implementation commit `eaa32e7574e6daa13d0cf50bb8cf9835ef261367`; independent reviewer confirmed W007-IR-01 resolved, no BLOCKER or MAJOR findings, and retained W007-IR-02 as MINOR.
+- CI run `39209653767` passed for the reviewed implementation commit. The remaining MINOR finding is documented and does not block the review PASS.
 
 ## Independent review focus
 
