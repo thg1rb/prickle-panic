@@ -22,7 +22,8 @@ Last updated: 2026-10-19
 
 ## Scope
 
-- Production Coco character presentation and required MVP reactions: idle, correct pick, incorrect pick, combo, countdown, victory, defeat, and loading where practical. Not every animation is required if the approved vertical slice documents omissions.
+- Production Coco character presentation across every MVP surface named in §2.8: Main Menu, Tutorial, Lobby, gameplay feedback, Results, Loading, and Error messages. Provide a form appropriate to each surface and document approved asset reuse.
+- Required MVP reactions: idle, correct pick, incorrect pick, combo, countdown, victory, defeat, loading, and friendly error/recovery states where practical. Static Coco poses may be reused if the approved vertical slice records the mapping.
 - Modular character parts and compositional rules that preserve Coco's silhouette, proportions, palette, quill style, face, and distinguishing expression across card variants.
 - Consistent rendering for the 32 binary-attribute combinations and all five gameplay attributes, without decorative accessories that can be mistaken for game attributes.
 - Card faces, backs if used, UI illustrations/icons, lightweight woodland/picnic background treatments, and gameplay feedback visual states.
@@ -43,15 +44,16 @@ Last updated: 2026-10-19
 ## Expected behavior
 
 1. All player-facing asset-related copy, labels, feedback, and settings remain Thai. Visual or audio effects never convey a different rule than the authoritative state.
-2. Each of the 32 cards is assembled from the same approved Coco base and modular attribute layers or a verified equivalent system. Given a card's five-bit identity, rendering is deterministic and visually maps each bit to the documented attribute without ambiguity.
-3. Card readability takes priority over decoration: stable aspect ratio, rounded shape, clear hierarchy, no gameplay-attribute ambiguity, and redundant non-color cues. Cards remain operable by mouse, touch, keyboard and accessible controls.
-4. Visual state feedback (correct, incorrect, combo, countdown, end/results) follows authoritative application state. Animation cannot alter, delay, or conceal card identity or create client-side score confirmation.
-5. Reduced-motion preference disables or simplifies nonessential motion without losing gameplay information or competitive advantage. Essential state remains understandable without animation or sound.
-6. Sound is optional and user-controlled; mute/volume settings work, and audio begins only after a suitable user interaction where the browser requires it. Audio must not be needed to perform an action.
-7. The 4×4 board remains visible and readable at supported target widths without document scrolling where requirements demand it. If playtesting finds poor readability, record a proposed design change for owner review; do not silently alter board contents, count, or gameplay attributes.
-8. Asset source files and a manifest identify each production asset's source, creator/provider, creation method, license/terms, attribution, restrictions, editable source path, and review/approval state. Generated assets include relevant prompt/reference provenance and generation tool/version when available.
-9. No protected artwork/branding from other games is copied. Third-party assets are used only with a recorded license compatible with the intended project distribution; uncertain rights remain unapproved and are not shipped.
-10. Asset loading failures show a Thai recoverable fallback rather than a broken game; decorative/audio failures cannot prevent gameplay or state recovery.
+2. Coco appears on each §2.8 MVP surface: Main Menu, Tutorial, Lobby, gameplay feedback, Results, Loading, and Error messages. W014 supplies the shared approved character assets and integration guidance; screen-owning Work Items (including W009 Lobby and W012 Results) consume the shared assets and prove coverage in their acceptance evidence.
+3. Each of the 32 cards is assembled from the same approved Coco base and modular attribute layers or a verified equivalent system. Given a card's five-bit identity, rendering is deterministic and visually maps each bit to the documented attribute without ambiguity.
+4. Card readability takes priority over decoration: stable aspect ratio, rounded shape, clear hierarchy, no gameplay-attribute ambiguity, and redundant non-color cues. Cards remain operable by mouse, touch, keyboard and accessible controls.
+5. Visual state feedback (correct, incorrect, combo, countdown, end/results) follows authoritative application state. Animation cannot alter, delay, or conceal card identity or create client-side score confirmation.
+6. Reduced-motion preference disables or simplifies nonessential motion without losing gameplay information or competitive advantage. Essential state remains understandable without animation or sound.
+7. Sound is optional and user-controlled; mute/volume settings work, and audio begins only after a suitable user interaction where the browser requires it. Audio must not be needed to perform an action.
+8. The 4×4 board remains visible and readable at supported target widths without document scrolling where requirements demand it. If playtesting finds poor readability, record a proposed design change for owner review; do not silently alter board contents, count, or gameplay attributes.
+9. Asset source files and a manifest identify each production asset's source, creator/provider, creation method, license/terms, attribution, restrictions, editable source path, and review/approval state. Generated assets include relevant prompt/reference provenance and generation tool/version when available.
+10. No protected artwork/branding from other games is copied. Third-party assets are used only with a recorded license compatible with the intended project distribution; uncertain rights remain unapproved and are not shipped.
+11. Asset loading failures show a Thai recoverable fallback rather than a broken game; decorative/audio failures cannot prevent gameplay or state recovery.
 
 ## Asset system and technical design
 
@@ -78,7 +80,7 @@ Last updated: 2026-10-19
 
 ## Acceptance criteria
 
-- **W014-AC-01:** Coco retains the documented recognizable hedgehog identity and Berry Picnic visual direction across home/game/results states; visual review confirms consistent proportions, quills, face, palette, and expressions.
+- **W014-AC-01:** Coco appears on every §2.8 MVP surface: Main Menu, Tutorial, Lobby, gameplay feedback, Results, Loading, and Error messages. W014 delivers the shared approved asset set; W009/W012 and other owning Work Items integrate it into their surfaces and record evidence. Visual review confirms consistent recognizable hedgehog identity and Berry Picnic direction.
 - **W014-AC-02:** All 32 card variations render from a deterministic mapping to the five documented binary attributes, with no ambiguity, missing variant, or decorative false attribute.
 - **W014-AC-03:** The 4×4 gameplay board remains readable, stable in aspect ratio, and operable without scrolling/hover on desktop and target mobile viewport; validation records actual screenshots/viewports and does not claim compliance without evidence.
 - **W014-AC-04:** Correct, incorrect, combo, countdown, victory/defeat, and loading feedback accurately reflects application/server state and does not change gameplay rules or authoritative scoring.
@@ -93,7 +95,7 @@ Last updated: 2026-10-19
 
 - Deterministic mapping tests cover all 32 card variants and verify each of five attributes through non-color/semantic representation.
 - Component tests cover asset loading fallback, Thai accessibility labels, correct/error/combo feedback state, mute/volume behavior, and reduced-motion rendering.
-- Browser visual review captures desktop and 320 CSS px mobile layouts, card readability, no page overflow, keyboard/focus interaction, and Results/game states. Physical mouse/touch QA should be recorded separately from synthetic browser events.
+- Browser visual review captures Coco usage on Main Menu, Tutorial, Lobby, gameplay feedback, Results, Loading and Error states; also desktop and 320 CSS px mobile layouts, card readability, no page overflow, and keyboard/focus interaction. Physical mouse/touch QA should be recorded separately from synthetic browser events.
 - Verify Phaser scene cleanup and ensure no leaked canvases, texture/audio listeners, or animation timers across navigation/rematch.
 - Verify autoplay behavior after user gesture, mute persistence as specified, and operation without audio device/playback.
 - Inspect Vite production output and record asset bundle sizes and load behavior. Do not add performance claims without measured results.
@@ -103,7 +105,7 @@ Last updated: 2026-10-19
 
 - W007 local gameplay prototype (DONE) and approved W005/W006 card attribute contract.
 - W011 gameplay UI integration: coordinate its approval/merge before replacing any interface it owns. W014 may build modular assets and visual components against existing W007 boundary, but must not duplicate or bypass W011's eventual server state path.
-- W012 Results screen and W013 re-connection state interfaces may need final visual integration; asset package design should be reusable across these features.
+- W009 Lobby, W012 Results, W013 reconnect/error states, and Tutorial/Main Menu/Loading surfaces must consume the shared Coco package where required by §2.8. Screen owners retain UI/state responsibility; W014 owns the shared character asset package and integration guidance.
 - Project Owner approval required for materially new character identity, asset source/license with restrictions or uncertain commercial rights, design changes affecting card readability/attributes, or omission of required MVP assets. Routine refinements within confirmed art direction can be resolved by approved design review.
 - External permission/rights are required before shipping third-party material without a clear compatible license. Never use protected competing-game artwork.
 

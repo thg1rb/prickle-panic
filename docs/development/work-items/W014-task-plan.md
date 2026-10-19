@@ -7,7 +7,7 @@ Branch: `feature/W014-coco-assets-gameplay-polish-spec`
 |---|---|---|---|---|
 | T01 | Approve modular Coco design, asset catalog/manifest, and source/licensing policy | §§4.1–4.10, 8.1–8.10, 22; W014-AC-01–10 | Approved technical/art direction and manifest schema | Owner approval where required; independent design/spec review |
 | T02 | Produce/review modular Coco and 32 card variant assets with editable sources | §§4.5–4.9; W014-AC-01–03/08 | Approved character, card assets, source files and provenance records | Exhaustive variant mapping; visual/readability review; licensing audit |
-| T03 | Integrate state-driven animation and Thai gameplay feedback | §§4.6, 22; W014-AC-04–05 | Shared visual feedback and accessible UI polish | Component/browser checks; reduced motion, keyboard, mobile, Phaser cleanup |
+| T03 | Integrate the shared Coco character package across Main Menu, Tutorial, Lobby, gameplay, Results, Loading and Error surfaces, plus state-driven Thai feedback | §§2.8, 4.6, 22; W014-AC-01/04–05 | Cross-surface mascot integration guidance and accessible UI polish | Surface coverage evidence with W009/W012 and owning Work Items; component/browser checks; reduced motion, keyboard, mobile, Phaser cleanup |
 | T04 | Add basic sound set, controls, and robust asset-loading fallbacks | §§3.1, 22.7; W014-AC-06–07 | Local audio assets/settings/fallbacks | Gesture/autoplay, mute, missing asset, no-audio checks |
 | T05 | Measure responsive behavior/performance, validate asset licenses, record evidence, and obtain exact-head independent review | W014-AC-03/08–10 | Validation report, manifest and PR evidence | `pnpm check`, Playwright, visual/browser and security/license review |
 
