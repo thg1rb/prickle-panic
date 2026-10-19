@@ -1,6 +1,6 @@
 # W007 — Local Gameplay Prototype
 
-Status: PLANNED
+Status: VERIFIED
 Type: Frontend Feature
 
 ## Goal
@@ -82,7 +82,23 @@ Replace the starter screen with a polished, Thai-language, single-player local S
 
 - Initial review at `6d925d171dc88788fb92287c6646d61ca19e722d`: FAIL with W007-R1 (MAJOR, 60-second TUNING mislabeled BASELINE) and W007-R2 (MINOR, frontend test runner and CI wiring unspecified).
 - Remediation: label §37 duration/score/board/cooldown values as configurable TUNING; name Vitest with React Testing Library and jsdom and require `pnpm test:web` in `pnpm check`/CI.
-- Re-review: pending for the updated exact revision.
+- Re-review: PASS at specification revision `50e7ed7e8c8b8cb7eec88ed0dd354dd8b4e6fdc5`.
+
+## Implementation validation evidence
+
+- Unit/component validation: `pnpm check` passed locally; includes 12 frontend tests, all 1,024 ordered card-pair checks, protocol fixtures, Go tests, formatting, lint, type check, vet, and production build.
+- Desktop browser QA: the local 4×4 board rendered as a 640×640 Phaser canvas with 16 descriptively labelled controls. A keyboard-selected valid card advanced score to 1 and displayed the Thai success message.
+- Mobile browser QA: at a 320×568 CSS-pixel viewport, the document measured 320×568 with no horizontal or vertical overflow. The board measured 296×296 and each card control measured approximately 65×65 CSS pixels. Keyboard focus was visible and usable.
+- Phaser canvas initialization and cleanup were observed in the browser: one canvas existed in gameplay and zero remained after returning home. Synthetic pointer events sent by the browser evaluation tool did not exercise Phaser's input path; physical mouse/touch selection remains unverified in this environment.
+- Page title, Thai document language, and meta description were verified in the browser and are populated from the Thai translation module.
+- Build emitted the expected lazy Phaser chunk at 1.37 MB uncompressed (357.33 kB gzip); Vite reports its generic 500 kB chunk advisory.
+
+## Implementation review history
+
+- Review 1: FAIL at `fbad25b330a04a1adbfada5a5a73777546832074`; W007-IR-01 (MAJOR) required all Thai display copy to be centralized; W007-IR-02 (MINOR) recorded physical pointer/touch and Phaser unmount browser QA as incomplete.
+- Remediation moved card descriptions and remaining document/home copy into `apps/web/src/i18n/th.ts`; browser QA verified canvas count 1 during gameplay and 0 after returning home. Physical pointer/touch selection remains unverified in this environment.
+- Review 2: PASS at implementation commit `eaa32e7574e6daa13d0cf50bb8cf9835ef261367`; independent reviewer confirmed W007-IR-01 resolved, no BLOCKER or MAJOR findings, and retained W007-IR-02 as MINOR.
+- CI run `39209653767` passed for the reviewed implementation commit. The remaining MINOR finding is documented and does not block the review PASS.
 
 ## Independent review focus
 

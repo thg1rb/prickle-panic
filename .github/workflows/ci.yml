@@ -51,6 +51,9 @@ jobs:
       - name: Type check
         run: pnpm typecheck
 
+      - name: Frontend tests
+        run: pnpm test:web
+
       - name: Protocol contract fixtures
         run: pnpm protocol:check
 
