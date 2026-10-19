@@ -16,7 +16,7 @@ Branch: `feature/W009-room-management`
 
 - W001–W007 (DONE); W005 protocol contract (DONE).
 - W008 approved and merged for authenticated Guest Session principal, username policy, and membership identity.
-- W010 protocol/runtime integration is coordinated; Room domain can be built before WebSocket integration, but end-to-end acceptance cannot be claimed until W010 supplies its approved adapter.
+- W010 protocol/runtime integration is coordinated; Room domain can be built before WebSocket integration, but end-to-end acceptance cannot be claimed until W010 supplies its approved adapter and enforces INV-004 globally across a Guest Session's active Room connections.
 - W011/W012 provide the authoritative Match coordinator and callbacks for countdown, in-progress, results, and return to Lobby.
 - W013 supplies unexpected-disconnect reservations, grace period, forfeit, and delayed Host migration.
 

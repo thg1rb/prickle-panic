@@ -35,4 +35,32 @@ Reason: Three MAJOR coverage/policy gaps and one MINOR traceability gap require 
 
 ## Review 2
 
-Pending independent re-review of the remediated specification revision.
+### Reviewed revision
+
+- Pull Request: #11
+- Commit SHA: `513708d28e46ecdf468c8302fbc89065d701642b`
+- Reviewer execution reference: Independent Sub-Agent
+- Review scope: Specification and task plan only; no implementation or tests were inspected or run.
+
+### Re-review results
+
+- W009-SR-01 — RESOLVED. Host countdown cancellation now specifies actor, transition, protocol scope, and test/acceptance coverage.
+- W009-SR-02 — RESOLVED. Lobby/Countdown/active-Match leave behavior and the W013 forfeit seam are specified.
+- W009-SR-03 — RESOLVED. The unsupported one-Room membership restriction was removed.
+- W009-SR-04 — RESOLVED. FR-005 Lobby username change is assigned to W009 with acceptance coverage.
+
+### Finding
+
+| ID | Severity | Evidence and impact | Required remediation |
+|---|---|---|---|
+| W009-SR-05 | MAJOR | The spec permits memberships in multiple Rooms but only required W010 to enforce one active connection per RoomPlayer. `REQUIREMENT.md` INV-004 prohibits one Guest Session from controlling multiple active Room connections, so separate memberships could still enable concurrent active connections. | Distinguish stored membership from active authority; require global W010 enforcement of INV-004, define replacement/disconnect behavior, and add acceptance/test coverage. |
+
+### Decision
+
+FAIL
+
+Reason: W009-SR-01 through W009-SR-04 are resolved, but W009-SR-05 remains a material conflict until the global Guest Session connection invariant and replacement behavior are explicit. No implementation or tests were inspected or run.
+
+## Review 3
+
+Pending independent re-review of the clarification to W009-SR-05.
