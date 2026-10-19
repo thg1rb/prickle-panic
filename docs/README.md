@@ -25,7 +25,7 @@ Requirements use the statuses CONFIRMED, BASELINE, TUNING, PROPOSED, DEFERRED, a
 - `testing/` — validation policy and evidence conventions.
 - `design/` and `standards/` — create when a Work Item needs authoritative detail in those areas.
 
-Do not create empty directories or duplicate requirement content. Ownership, purpose, authoritative references, and update conditions may be inherited from the applicable family row above; each feature specification must still list its exact requirement IDs, and every other derived document must name its relevant requirement sections or IDs.
+Do not create empty directories or duplicate requirement content. Ownership, purpose, authoritative references, and update conditions may be inherited from the applicable family row above. Each feature specification and task plan must list its exact requirement IDs; other documents may rely on their family references unless they address a narrower requirement that needs an explicit citation.
 
 ## Review and maintenance
 
