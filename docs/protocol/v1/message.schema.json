@@ -411,7 +411,7 @@
               ],
               "properties": {
                 "matchId": { "$ref": "#/$defs/id" },
-                "accepted": { "type": "boolean" },
+                "accepted": { "const": true },
                 "outcome": { "enum": ["correct", "incorrect"] },
                 "boardVersion": { "type": "integer", "minimum": 0 },
                 "referenceVersion": { "type": "integer", "minimum": 0 }
