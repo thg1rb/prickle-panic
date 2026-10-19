@@ -15,8 +15,8 @@ The Work Item IDs below preserve the baseline in `docs/REQUIREMENT.md` §32. Eac
 | Multiplayer foundation | W009 — Room Management | W005, W008 | Private Rooms, invites, Lobby, Ready and host permissions |
 | Multiplayer foundation | W010 — WebSocket Foundation | W005, W008, W009 | Authorized connection and bounded state synchronization |
 | Online gameplay | W011 — Multiplayer Speed Battle | W006–W010 | Server-authoritative multi-player Speed Battle |
-| Online gameplay | W012 — Results & Rematch | W011 | Results, winners, return to Lobby and reset Match |
-| Online gameplay | W013 — Reconnection & Anti-Griefing | W010–W012 | Grace period, forfeit, host migration and rate limits |
+| Online gameplay | W013 — Reconnection & Anti-Griefing | W008–W011 | Network grace, session-expiry forfeit, eligibility, host migration and rate limits |
+| Online gameplay | W012 — Results & Rematch | W009–W011, W013 | Results and winners from final score/eligibility; Room return and Match reset |
 | Product experience | W014 — Coco Assets & Gameplay Polish | W007 and integrated MVP | Consistent assets, audio, animation and responsive polish |
 | MVP validation | W015 — Closed Alpha Readiness | W011–W014 | Independent end-to-end, security, compatibility and performance acceptance |
 | Post-MVP | New Work Items for Classic Rush and Party Chaos | W015 | Assign IDs after MVP review; preserve FR-045–063 and AC-011–016 |
