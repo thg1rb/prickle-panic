@@ -13,13 +13,13 @@ Replace the starter screen with a polished, Thai-language, single-player local S
 - Integrate Phaser 4 as a React-owned board view: Phaser draws the cards and reports pointer selections; React owns navigation, HUD, accessible control semantics, and the temporary local game state.
 - Add a disposable TypeScript local game adapter that mirrors W006's Go engine for browser-only interaction. Keep it explicitly local and replace it with server-authoritative state in W011.
 - Display a reference card and 16 selectable Coco variants in a visible 4×4 board.
-- Implement the baseline local rules: distance 0–1 is correct, +1 score, update reference, replace same slot, preserve a valid selection, increment combo, incorrect pick awards zero, preserves board/reference/score, resets combo, and applies the 0.8-second cooldown without extension.
-- Run the configurable baseline 60-second countdown; show local results and allow a replay with a fresh deterministic/random seed.
+- Implement the BASELINE local rules: distance 0–1 is correct, update reference, replace same slot, preserve a valid selection, increment combo, and incorrect pick awards zero, preserves board/reference/score, and resets combo. Keep score award, board size, duration, and cooldown as configurable TUNING values; start with §37's +1 point, 4×4 board, 60-second duration, and 0.8-second cooldown. Cooldown must not extend on further actions.
+- Run the configurable 60-second initial TUNING countdown; show local results and allow a replay with a fresh deterministic/random seed.
 - Keep player-facing copy in Thai and centralized in one translation module; no server messages, Rooms, accounts, or English localization.
 - Support touch, mouse, keyboard, visible focus, and screen-reader access while keeping the Phaser canvas decorative and providing accessible per-card controls.
 - Respect `prefers-reduced-motion` and avoid requiring hover or scrolling to play.
 - Use temporary procedural vector card visuals. Do not create or claim finished Coco artwork; W014 owns production assets and licensing records.
-- Add focused frontend tests for local rules, accessible interactions, timer/cooldown, and end/replay flow using the project's standard TypeScript test tooling.
+- Add Vitest with React Testing Library and jsdom for focused frontend tests of local rules, accessible interactions, timer/cooldown, and end/replay flow. Add a `test:web` command and run it in `pnpm check` so required CI executes the frontend tests.
 
 ## Non-goals
 
@@ -55,15 +55,15 @@ Replace the starter screen with a polished, Thai-language, single-player local S
 ## Acceptance criteria
 
 - **W007-AC-01:** Home, game, error/feedback, timeout, and result UI text is Thai and comes from centralized translation keys; no English player-visible copy is introduced.
-- **W007-AC-02:** The local game displays a reference card and exactly 16 selectable cards in a visible 4×4 board; card variation mapping follows W005/W006 bit order.
+- **W007-AC-02:** The local game displays a reference card and the configured initial TUNING board of 16 selectable cards in a visible 4×4 grid; card variation mapping follows W005/W006 bit order.
 - **W007-AC-03:** TypeScript matching is exhaustively checked across all 1,024 ordered variation pairs and agrees with the documented `distance <= 1` rule.
-- **W007-AC-04:** Correct picks score +1, increment combo, update reference, replace the selected position, and preserve board solvability. Incorrect picks score zero, preserve score/reference/board, reset combo, show Thai feedback, and apply a non-extending 0.8-second cooldown.
-- **W007-AC-05:** Configurable 60-second baseline timer ends the local match, shows result score, and replay creates fresh state with score/combo/timer reset.
+- **W007-AC-04:** Correct picks increment score by the configured award (initial TUNING +1), increment combo, update reference, replace the selected position, and preserve board solvability. Incorrect picks score zero, preserve score/reference/board, reset combo, show Thai feedback, and apply the configured non-extending cooldown (initial TUNING 0.8 seconds).
+- **W007-AC-05:** Configurable duration (initial TUNING 60 seconds) ends the local match, shows result score, and replay creates fresh state with score/combo/timer reset.
 - **W007-AC-06:** React owns app state and Phaser lifecycle is cleaned up on unmount; card pointer selection and accessible button selection invoke the same transition once.
 - **W007-AC-07:** All 16 cards are usable by touch and keyboard; visible focus, Thai accessible labels, reduced-motion preference, readable contrast, and no hover-only action are supported.
 - **W007-AC-08:** At 320 CSS px the full board and primary gameplay controls fit without document-level horizontal or vertical scrolling; browser validation records actual viewport and observed behavior.
 - **W007-AC-09:** The UI clearly represents a local prototype. The local adapter has no network authority and no Room/session code; W011 replacement is documented.
-- **W007-AC-10:** Focused unit/component tests and CI pass; no test result is claimed unless it ran.
+- **W007-AC-10:** Vitest/React Testing Library unit/component tests run through `pnpm test:web` and `pnpm check`, are included in CI, and pass; no test result is claimed unless it ran.
 
 ## Dependencies
 
@@ -77,6 +77,12 @@ Replace the starter screen with a polished, Thai-language, single-player local S
 - Browser QA at a desktop viewport and 320 CSS px mobile viewport, including pointer and keyboard use, reduced motion, correct/incorrect pick, cooldown edge, timeout, and replay.
 - Inspect Phaser cleanup under screen transitions and verify one action per card activation.
 - Run `pnpm check` and CI security checks; report browser and test outcomes separately.
+
+## Specification review history
+
+- Initial review at `6d925d171dc88788fb92287c6646d61ca19e722d`: FAIL with W007-R1 (MAJOR, 60-second TUNING mislabeled BASELINE) and W007-R2 (MINOR, frontend test runner and CI wiring unspecified).
+- Remediation: label §37 duration/score/board/cooldown values as configurable TUNING; name Vitest with React Testing Library and jsdom and require `pnpm test:web` in `pnpm check`/CI.
+- Re-review: pending for the updated exact revision.
 
 ## Independent review focus
 
