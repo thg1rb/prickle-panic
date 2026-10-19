@@ -128,7 +128,7 @@ Last updated: 2026-10-19
 ## Dependencies and risks
 
 - W005 protocol contract (DONE) is the schema/error baseline.
-- W008 approved/merged Guest Session is required for cookie-authenticated upgrade and stable session principal; current approval is pending.
+- W008's Guest Session specification and policy baseline are Project Owner-approved; PR #10 integration into `develop` remains pending and is required before cookie-authenticated upgrade implementation.
 - W009 approved/merged Room manager is required for membership-checked routing, Room event sequences, state snapshots, and disconnect/presence APIs; its reviewed spec is pending owner decisions/merge.
 - W011 consumes the Gateway dispatch seam for authoritative gameplay. W013 consumes connection loss/replacement signals for grace, forfeit, and recovery.
 - Key risks: handshake/replacement races; server shutdown leaks; stale authority during socket close; event sequence gaps; strict protocol incompatibility; private snapshot leaks; idempotency cache memory/expiry; proxy Origin/host spoofing; slow clients; and unverified library behavior/limits.
