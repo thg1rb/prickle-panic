@@ -10,6 +10,7 @@
     "dev": "pnpm --filter @prickle-panic/web dev",
     "build": "pnpm --filter @prickle-panic/web build",
     "typecheck": "pnpm --filter @prickle-panic/web typecheck",
+    "test:web": "pnpm --filter @prickle-panic/web test:web",
     "server:run": "go -C apps/server run ./cmd/server",
     "format:check": "prettier --check \"apps/**/*.{ts,tsx,js,jsx,json,css,html}\" \"docs/protocol/**/*.json\" \"scripts/**/*.mjs\" \"*.json\" pnpm-workspace.yaml \".github/**/*.yml\"",
     "format:write": "prettier --write \"apps/**/*.{ts,tsx,js,jsx,json,css,html}\" \"docs/protocol/**/*.json\" \"scripts/**/*.mjs\" \"*.json\" pnpm-workspace.yaml \".github/**/*.yml\"",
@@ -18,7 +19,7 @@
     "test:go": "go -C apps/server test ./...",
     "vet:go": "go -C apps/server vet ./...",
     "protocol:check": "node scripts/validate-protocol.mjs",
-    "check": "pnpm format:check && pnpm go:format:check && pnpm lint && pnpm typecheck && pnpm protocol:check && pnpm test:go && pnpm vet:go && pnpm build"
+    "check": "pnpm format:check && pnpm go:format:check && pnpm lint && pnpm typecheck && pnpm test:web && pnpm protocol:check && pnpm test:go && pnpm vet:go && pnpm build"
   },
   "devDependencies": {
     "ajv": "^8.20.0",

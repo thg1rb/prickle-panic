@@ -1,6 +1,6 @@
 # W007 — Local Gameplay Prototype
 
-Status: PLANNED
+Status: READY_FOR_REVIEW
 Type: Frontend Feature
 
 ## Goal
@@ -82,7 +82,15 @@ Replace the starter screen with a polished, Thai-language, single-player local S
 
 - Initial review at `6d925d171dc88788fb92287c6646d61ca19e722d`: FAIL with W007-R1 (MAJOR, 60-second TUNING mislabeled BASELINE) and W007-R2 (MINOR, frontend test runner and CI wiring unspecified).
 - Remediation: label §37 duration/score/board/cooldown values as configurable TUNING; name Vitest with React Testing Library and jsdom and require `pnpm test:web` in `pnpm check`/CI.
-- Re-review: pending for the updated exact revision.
+- Re-review: PASS at specification revision `50e7ed7e8c8b8cb7eec88ed0dd354dd8b4e6fdc5`.
+
+## Implementation validation evidence
+
+- Unit/component validation: `pnpm check` passed locally; includes 12 frontend tests, all 1,024 ordered card-pair checks, protocol fixtures, Go tests, formatting, lint, type check, vet, and production build.
+- Desktop browser QA: the local 4×4 board rendered as a 640×640 Phaser canvas with 16 descriptively labelled controls. A keyboard-selected valid card advanced score to 1 and displayed the Thai success message.
+- Mobile browser QA: at a 320×568 CSS-pixel viewport, the document measured 320×568 with no horizontal or vertical overflow. The board measured 296×296 and each card control measured approximately 65×65 CSS pixels. Keyboard focus was visible and usable.
+- Phaser canvas initialization was observed in the browser. Pointer events sent synthetically by the browser evaluation tool did not exercise Phaser's input path; physical mouse/touch selection and scene destruction on unmount still require independent browser review or manual verification.
+- Build emitted the expected lazy Phaser chunk at 1.37 MB uncompressed (357.33 kB gzip); Vite reports its generic 500 kB chunk advisory.
 
 ## Independent review focus
 
