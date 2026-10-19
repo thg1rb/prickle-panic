@@ -1,6 +1,6 @@
 # W006 — Card Matching Engine
 
-Status: PLANNED
+Status: READY_FOR_REVIEW
 Type: Core Engine
 
 ## Goal
@@ -47,7 +47,7 @@ Implement a pure, deterministic Go domain package for Coco's five-bit card varia
 - **W006-AC-03:** A variation and a card instance are distinct types/concepts; generated card IDs are unique in scope, including replacements, while duplicate variations remain allowed.
 - **W006-AC-04:** Correct pick transition awards the configured +1 point, advances reference to the selected variation, removes/replaces the selected slot, increments combo, and preserves a 16-card board with a valid choice. Incorrect pick awards zero, preserves board/reference/score, and resets combo. Cooldown timing and technical rejection are caller concerns.
 - **W006-AC-05:** Seeded generation is reproducible, does not use package-global random state, and guarantees an available valid choice on every produced interactive board.
-- **W006-AC-06:** Public engine APIs are deterministic and do not mutate caller-owned input; invalid indices/identifiers return explicit errors without partial mutation.
+- **W006-AC-06:** Public engine APIs are deterministic and do not mutate caller-owned input; invalid configuration or card identifiers return explicit errors without partial mutation.
 - **W006-AC-07:** Unit tests cover bit/attribute mapping, both body-color values, all single-bit toggles, Hamming distance boundaries, duplicate variations with unique instances, scoring/combo transitions, board cardinality, solvability, replacement identity, invalid actions, and multiple seeds.
 - **W006-AC-08:** The independent package has no transport or frontend imports and passes `gofmt`, `go test`, and `go vet` in CI.
 - **W006-AC-09:** The generation fallback and any chosen random-source/ID strategy are documented as proposed technical choices; BASELINE gameplay behavior and TUNING values remain unchanged.
