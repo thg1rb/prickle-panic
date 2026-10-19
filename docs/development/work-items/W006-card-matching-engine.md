@@ -11,7 +11,7 @@ Implement a pure, deterministic Go domain package for Coco's five-bit card varia
 
 - Represent 32 card variations as values 0–31 with the W005 MSB-first attribute mapping.
 - Represent card instances separately from variations and keep instance IDs unique within a board/game-state scope.
-- Implement `HammingDistance` and the confirmed `distance <= 1` match rule.
+- Implement `HammingDistance` and the `distance <= 1` match rule documented as BASELINE in `docs/REQUIREMENT.md` §40.
 - Implement correct-pick score/combo transition semantics and incorrect-pick outcome semantics without embedding transport or cooldown timing.
 - Implement seeded deterministic board/reference generation suitable for repeatable tests; maintain at least one valid selection after initial generation and every replacement.
 - Provide immutable or copy-safe operations so callers cannot mutate engine-owned input unexpectedly.
@@ -36,7 +36,7 @@ Implement a pure, deterministic Go domain package for Coco's five-bit card varia
 
 - A caller supplies a seed or `math/rand` source; no package-global randomness is permitted. The server retains random state privately and never exposes future sequences.
 - Generate a reference variation, then independently sample 16 variation values for board instances. Duplicate variations are allowed because requirements distinguish variation from instance.
-- If an initial board contains no valid match, replace its last slot with a uniformly selected valid variation from the six values at Hamming distance 0 or 1. After a correct pick, first place the replacement in the selected slot; if the resulting board has no valid choice relative to the new reference, replace that same slot with a uniformly selected valid variation. This is a proposed deterministic fallback; it preserves the confirmed solvability invariant but slightly changes distribution only for a board that would otherwise be unsolvable.
+- If an initial board contains no valid match, replace its last slot with a uniformly selected valid variation from the six values at Hamming distance 0 or 1. After a correct pick, first place the replacement in the selected slot; if the resulting board has no valid choice relative to the new reference, replace that same slot with a uniformly selected valid variation. This is a proposed deterministic fallback; it preserves the documented solvability invariant but slightly changes distribution only for a board that would otherwise be unsolvable.
 - Every generated instance receives a unique opaque ID scoped to the generated board. Replacement generation must not reuse any active card-instance ID.
 - Treat randomness distribution, seed plumbing, and replacement policy as implementation details; do not expose PRNG state to clients or turn the current tuning table into constants that cannot be configured later.
 
@@ -50,7 +50,7 @@ Implement a pure, deterministic Go domain package for Coco's five-bit card varia
 - **W006-AC-06:** Public engine APIs are deterministic and do not mutate caller-owned input; invalid indices/identifiers return explicit errors without partial mutation.
 - **W006-AC-07:** Unit tests cover bit/attribute mapping, both body-color values, all single-bit toggles, Hamming distance boundaries, duplicate variations with unique instances, scoring/combo transitions, board cardinality, solvability, replacement identity, invalid actions, and multiple seeds.
 - **W006-AC-08:** The independent package has no transport or frontend imports and passes `gofmt`, `go test`, and `go vet` in CI.
-- **W006-AC-09:** The generation fallback and any chosen random-source/ID strategy are documented as proposed technical choices; confirmed gameplay rules and TUNING values remain unchanged.
+- **W006-AC-09:** The generation fallback and any chosen random-source/ID strategy are documented as proposed technical choices; BASELINE gameplay behavior and TUNING values remain unchanged.
 
 ## Implementation boundary
 
@@ -71,7 +71,7 @@ Proposed location: `apps/server/internal/game/` with small card, board, and scor
 ## Independent review focus
 
 - Exact matching and bit order, inclusive zero-distance rule, exhaustive pair count.
-- No accidental change to confirmed score, combo, cooldown, or board rules.
+- No accidental change to BASELINE score, combo, cooldown, or board rules.
 - Deterministic solvability guarantee and documented sampling bias.
 - Card-instance identity uniqueness and replacement behavior.
 - Pure boundaries, error atomicity, and test evidence.
