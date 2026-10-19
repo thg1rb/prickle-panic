@@ -136,6 +136,6 @@ Last updated: 2026-10-19
 ## Approval
 
 - Project Owner / authorized approver: Pending
-- Independent specification review: PASS at `d5c54bfb786d0a81e903336e3aba662515442052` with W010-SR-01 MINOR follow-up, recorded in `docs/development/reviews/W010-review.md`; clarification re-review pending
+- Independent specification review: PASS at `ec39f546875428c56cfe32419f7b9be006f863c8`, recorded in `docs/development/reviews/W010-review.md`
 - Decision and date: Pending
 - W008/W009 dependency approval/merge: Pending
