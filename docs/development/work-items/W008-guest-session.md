@@ -11,7 +11,7 @@ Create and recover an anonymous player identity without login, validate the play
 
 - Add a Go Guest Session module with opaque guest identity, cryptographically generated session credentials, explicit expiry, and in-memory active session storage for the MVP process lifetime.
 - Add HTTP session creation and recovery endpoints; creation accepts the initial username and sets the credential in an HttpOnly cookie. Recovery reads the cookie and returns only the authorized guest identity and display username.
-- Validate usernames on the server: trim leading/trailing whitespace; require 2–16 Unicode grapheme clusters after trimming; accept Thai, English, numbers, and internal spaces as explicitly required without treating this list as an exclusive allowlist; accept other safe Unicode text too; reject empty values, unsafe control characters, and values unsafe for text rendering. Duplicate-in-Room checks belong to W009 when Room membership exists.
+- Validate usernames on the server using `docs/REQUIREMENT.md` §6.2: trim surrounding whitespace, normalize to NFC, enforce 2–16 Unicode extended grapheme clusters, a 256-byte raw-input limit, and the documented strict Thai/English/digit/single-ASCII-space character policy. Duplicate-in-Room comparison belongs to W009.
 - Keep guest identity separate from username. Do not use username as a credential or expose the credential in JSON, logs, browser storage, URLs, or errors.
 - Let the client remember only the last display username in localStorage, create a session after valid submission, and restore an existing session after refresh through the recovery endpoint. Add Thai UI copy for validation, expiry, and service failures.
 - Define testable interfaces so W009 and W010 can authorize Room and WebSocket actions from the same session manager.
@@ -23,7 +23,7 @@ Create and recover an anonymous player identity without login, validate the play
 - Room membership, same-Room duplicate username checks, Lobby username changes, host authority, or Room actions (W009).
 - WebSocket connection management, single-active-connection enforcement, reconnection handoff, or gameplay authorization (W010/W013).
 - Broader abuse controls and later rate-limit tuning; W013 owns those. W008 must include protective session-creation rate limiting before public endpoint exposure.
-- Changes to confirmed username/session requirements or production session expiration policy.
+- Room membership, duplicate-name comparison implementation, Lobby username changes, host authority, or Room actions (W009).
 
 ## Requirement references
 
@@ -42,35 +42,36 @@ Create and recover an anonymous player identity without login, validate the play
 
 ## Business rules
 
-- Apply the authoritative username policy in §6.2 exactly: 2–16 visible characters using Unicode grapheme clusters, Thai/English/numbers and internal spaces explicitly permitted, outer whitespace trimmed, no empty/whitespace-only username, and no unsafe control characters or harmful text rendering. The listed categories are not an exclusive allowlist; other safe Unicode text must not be rejected merely because it is not listed. Render usernames as text, never markup.
+- Apply §6.2 exactly: trim surrounding whitespace, NFC-normalize, enforce 2–16 extended grapheme clusters and a 256-byte raw-input cap; permit Thai letters with valid associated marks, English letters, ASCII/Thai digits, and single internal ASCII spaces only. Reject controls, invisible/format/zero-width/bidirectional controls, standalone or malformed combining marks, emoji, unsupported scripts/punctuation, markup, and overlong input. Render as text, never markup. W009 performs same-Room duplicate comparison using an NFC key with ASCII-English case-insensitivity and preserves display casing.
 - Guest ID is unique and distinct from display username; usernames can repeat globally.
 - Raw credentials are unpredictable, server-issued, and not stored in localStorage.
-- Production cookie attributes are HttpOnly, Secure, explicit expiry, and an appropriate SameSite setting. Cookie lifetime and SameSite value remain subject to the documented policy decision below.
+- Session idle timeout is 24 hours after the last qualifying successful authenticated application activity or explicit recovery; absolute lifetime is 7 days from creation. The earlier deadline expires the session. Ping/pong, passive snapshots, background heartbeats, and failed requests do not qualify. Both values are configurable and enforced server-side across HTTP and WebSocket authorization. Session expiry during a Match revokes authorization and causes immediate forfeit, without the separate 15-second network reconnection grace.
+- Production cookie is `__Host-prickle_guest; HttpOnly; Secure; SameSite=Lax; Path=/`, without Domain, with Max-Age no greater than the 7-day absolute lifetime. Local HTTP development uses a separate explicit development-only configuration. Production requires HTTPS/WSS, strict WebSocket Origin validation, and message-level authorization.
+- Credentials are opaque CSPRNG tokens with at least 256 bits of randomness. Store a cryptographic hash server-side when practical; support invalidation; never log or expose raw credentials in URLs, localStorage, JSON, or error details; do not rotate on WebSocket reconnect.
 - An invalid session cannot authorize protected operations. No endpoint returns raw credentials or verifier material.
 
 ## Edge cases and error handling
 
 - Missing, malformed, overlong, or invalid Unicode input: reject with a stable error code and no session mutation.
-- A username of one grapheme (including a multi-codepoint grapheme), two graphemes, sixteen graphemes, and seventeen graphemes must be tested explicitly.
-- Whitespace-only, leading/trailing whitespace, internal spaces, Thai combining marks, emoji grapheme sequences (including ZWJ), Arabic text, C0/C1 controls, and each listed bidi control must be tested. Bidi controls are proposed to be rejected; ZWJ must remain accepted.
+- Test one, two, sixteen, and seventeen grapheme boundaries; NFC-equivalent forms; Thai consonants, vowel marks and tone marks; ASCII and Thai digits; English case equivalence for Room duplicate keys; outer trimming, one internal ASCII space, and repeated-space rejection; 256-byte input boundary; controls, invisible/format/zero-width/bidirectional controls, malformed combining sequences, emoji, unsupported scripts and punctuation, and markup. Valid Thai combining sequences must remain accepted.
 - Credential collision: retry generation a bounded number of times, then fail safely without issuing a duplicate identity.
 - Missing, expired, malformed, unknown, or revoked cookie: return unauthenticated without revealing which credential check failed.
-- Session store capacity or entropy-source failure: fail closed and do not issue a partial session.
+- Entropy-source failure or bounded credential-collision retries: fail closed and do not issue a partial session. No arbitrary active-session capacity is introduced; all stores and rate-limit state must remain bounded with cleanup.
 - Cross-origin session creation/recovery requests: reject disallowed origins; production deployments must use HTTPS and an explicit cookie policy. Exact CSRF and Origin behavior must be reviewed with the HTTP API design.
 - Process restart loses in-memory sessions; the client recovers as unauthenticated and can create a new guest identity. This limitation must be documented to the player through ordinary UX only if needed; it is not a server error detail.
-- Session creation is an unauthenticated sensitive operation. Apply a configurable protective rate limit at the HTTP edge that does not rely exclusively on a guest session ID; reject excess attempts without allocating sessions. The initial threshold and source signal are proposed security/tuning decisions for technical design. Do not expose the endpoint publicly until this limit and its tests are in place.
+- Session creation is limited server-side to 10 new sessions per 10 minutes per source IP as an initial configurable baseline. Reuse an existing valid session on refresh. Return an appropriate rate-limit response without allocating state. Configure trusted-proxy handling explicitly, bound limiter memory, and assess shared-network fairness and network-source bypass during abuse testing. W009 applies 5 room-create attempts per 10 minutes/session and 20 joins/minute/session; additional source controls may mitigate session churn.
 
 ## Acceptance criteria
 
 - **W008-AC-01:** A visitor can create a guest session with a valid username without login; server issues a unique guest ID distinct from username.
-- **W008-AC-02:** Server applies the exact §6.2 trim, grapheme-count, and unsafe-control rules; Thai, English, numbers, and internal spaces are accepted, and other safe Unicode is not rejected solely by an allowlist. Boundary and Unicode tests cover valid/invalid examples, including proposed rejection of Bidi_Control characters while preserving Arabic text and ZWJ emoji.
+- **W008-AC-02:** Server applies §6.2 exactly, including trimming, NFC, 2–16 extended grapheme clusters, 256-byte raw limit, strict allowed character categories and rejection rules. Tests cover Thai valid marks, normalization equivalence, English case-insensitive duplicate keys (W009), both digit sets, whitespace, grapheme boundaries, malformed/invisible/bidi/control input, emoji, unsupported characters and markup.
 - **W008-AC-03:** Invalid creation returns a stable error, creates no session, and sets no credential cookie.
 - **W008-AC-04:** Session credential is cryptographically unpredictable, carried in an HttpOnly cookie, never returned in JSON, never stored in localStorage, URL, or logs, and never placed in WebSocket JSON.
 - **W008-AC-05:** Recovery after refresh returns the same guest ID and username for a valid session; invalid/expired/missing credentials are uniformly unauthenticated.
-- **W008-AC-06:** Cookie policy, expiry, credential hashing/storage, endpoint schema, and in-memory restart limitation are documented; no durable database is introduced.
+- **W008-AC-06:** Approved cookie, 24-hour idle/7-day absolute expiry, qualifying-activity definition, credential hashing/storage, endpoint schema, and in-memory restart limitation are documented; no durable database is introduced.
 - **W008-AC-07:** Session manager APIs are isolated from HTTP/transport and testable; authorization lookup distinguishes unauthenticated from valid session without leaking secrets.
 - **W008-AC-08:** React client remembers only display username, calls create/recovery, restores or prompts appropriately, and renders all player-visible content in Thai.
-- **W008-AC-09:** Tests cover session creation/recovery/expiry/revocation, collision/failure handling, cookie attributes, unauthenticated session-creation rate limiting, username Unicode boundaries, client refresh behavior, and no credential leakage; `pnpm check` and CI pass.
+- **W008-AC-09:** Tests cover idle and absolute expiry boundaries, qualifying/non-qualifying activity, HTTP/WS authorization revocation, immediate active-Match forfeit on expiry, credential generation/hash/revocation/no rotation, cookie attributes and local-dev separation, 10-per-10-minute/IP session creation limits and reuse, Unicode cases listed in §6.2, refresh behavior, and no credential leakage; `pnpm check` and CI pass.
 - **W008-AC-10:** Independent review PASS applies to the exact final PR commit; no BLOCKER/MAJOR findings remain, PR is merged to `develop`, feature branch retained, and evidence is recorded.
 
 ## Technical design
@@ -80,10 +81,10 @@ Create and recover an anonymous player identity without login, validate the play
 - React client: add a guest-entry bootstrap state and API client; on app startup recover session with credentials included; keep only display username in localStorage; keep no authentication secret in JS-readable storage.
 - Integration seam: Room and WebSocket layers receive an authenticated `GuestSession` value from middleware/connection setup, never a caller-supplied guest ID.
 - Proposed credential design: generate a separate 16-byte random guest ID and 32-byte random session credential with `crypto/rand`; encode both as unpadded base64url strings with distinct prefixes. Store `SHA-256(credential)` as the in-memory lookup key, never the raw credential. The 256-bit credential is high-entropy, so a fast one-way digest is adequate for verifier storage; do not add a password hashing function or pepper secret.
-- Proposed expiry: fixed 24-hour absolute lifetime from creation; recovery does not extend it. Inject the clock into the session manager for deterministic expiry tests. Sweep expired sessions once per minute and stop the cleanup loop on server shutdown.
-- Proposed production cookie: `__Host-pp_guest`, `Secure`, `HttpOnly`, `SameSite=Lax`, `Path=/`, no `Domain`, and `Max-Age=86400`/matching `Expires`. For local HTTP development only, use `pp_guest_dev` without `Secure`; keep it host-only, HttpOnly, SameSite=Lax, and Path `/`. Configure Vite to proxy `/api` to Go so the browser uses same-origin requests; never enable the development cookie in production.
-- Proposed session-creation limiter: configurable in-memory rolling 60-second window, default 10 attempts per source IP, applied before request-body parsing and session allocation. Return `429` with `Retry-After`. Use `RemoteAddr` unless the immediate peer is in an explicit trusted-proxy list; only then parse forwarding headers from right to left, ignoring untrusted client-supplied prefixes. Bound limiter-key storage and prune stale entries. Add an active-session capacity of 10,000 by default; reject creation when full without allocating partial state. Initial thresholds/capacity require owner approval and load/abuse review.
-- Username validation proposal: trim Go Unicode whitespace, reject invalid UTF-8, C0/C1 controls, and Unicode `Bidi_Control` characters (including U+061C, U+200E–U+200F, U+202A–U+202E, and U+2066–U+2069), then count extended grapheme clusters. Preserve all otherwise-safe Unicode, including Arabic text, ZWJ (U+200D) emoji sequences, and other safe scripts; render usernames as escaped text inside a bidirectional isolation element (`<bdi dir="auto">`) in the web UI. Do not treat markup characters as executable content or reject them solely by spelling. This is a proposed safety policy requiring Project Owner approval.
+- Approved expiry: enforce configurable 24-hour idle and 7-day absolute deadlines; use the earlier. Count successful authenticated application actions and explicit session recovery as qualifying activity, but exclude WebSocket ping/pong, passive snapshots, background heartbeats, and failed requests. Inject a clock for deterministic tests. Expiration invalidates HTTP and WebSocket authorization consistently. If it happens during an active Match, revoke/close and immediately forfeit, without the distinct network-loss grace period. Cleanup must stop on shutdown.
+- Approved production cookie: `__Host-prickle_guest`, Secure, HttpOnly, SameSite=Lax, Path `/`, no Domain, with Max-Age/Expires capped by the absolute expiration. Define a separate development-only HTTP cookie configuration; never weaken production settings. Use HTTPS/WSS in production, strict Origin validation, and per-message authorization.
+- Approved session-creation limit: no more than 10 newly allocated sessions per 10 minutes per source IP, configurable and server-side. Reuse valid sessions on refresh. Return 429/Retry-After or the approved stable rate-limit mapping. Use only explicitly trusted proxy metadata; bound and clean limiter-key storage. Do not add an active-session cap without measured need and a separately approved policy.
+- Approved username policy is specified in `docs/REQUIREMENT.md` §6.2. Enforce its 256-byte raw input bound before normalization. Grapheme counting must use extended grapheme clusters and preserve valid Thai combining sequences. W009 owns duplicate keys (NFC plus ASCII-English case-insensitive comparison).
 - Grapheme dependency candidate: `github.com/clipperhouse/uax29/v2/graphemes` at v2.7.0. The package documents Unicode 17 grapheme rules, official Unicode test-suite use, and an MIT license; confirm the exact source/revision and dependency graph at implementation time. Do not install it until the specification and dependency review are approved.
 - Start with process-local storage; no persistence or distributed session dependency.
 
@@ -98,15 +99,15 @@ Create and recover an anonymous player identity without login, validate the play
 
 ## Test plan
 
-- Go unit tests for username grapheme policy, unique guest IDs, credential generation, expiry/revocation, capacity/failure behavior, limiter boundary/source parsing, and race-safe concurrent access. Include known UAX #29 vectors for Thai combining sequences, emoji joined by ZWJ, regional-indicator flags, Arabic, and Unicode 17 test data where useful; invalid UTF-8, C0/C1 controls, and listed Bidi_Control code points reject under the proposed policy. Confirm U+200D ZWJ remains accepted. Literal `<script>`-like text remains accepted as a username and must render inertly as text.
+- Go unit tests for username grapheme policy, unique guest IDs, CSPRNG credential generation/hash/revocation, idle and absolute expiry, activity qualification, authorization invalidation, limiter boundary/source parsing, and race-safe concurrent access. Include UAX #29 tests for Thai vowel/tone marks and normalization-equivalent forms; ASCII/Thai digits; one internal space and repeated-space rejection; malformed/invisible/bidi controls, emoji, unsupported scripts/punctuation, markup, and byte/grapheme boundaries. Verify safe text rendering. Do not include active-session capacity tests absent an approved cap.
 - HTTP tests for endpoint status/error mapping, 4 KiB request-body limit, cookie flags, no-cookie-on-error, Origin and Fetch Metadata behavior, limiter before body parsing/session allocation, expired-cookie clearing, and credential absence from response bodies/log hooks.
 - Frontend tests for username input, Thai errors, create/recovery bootstrap, refresh restoration, and localStorage containing display name only.
 - Security checks for dependency audit and static analysis; `pnpm check` and exact-head CI. Verify the session-creation limiter before authentication and confirm excess attempts allocate no sessions.
 - Independent review inspects the implementation diff, specs, tests, actual results, and final SHA.
 
-## T01 design proposal and approval
+## Owner decisions and implementation gate
 
-The following defaults are proposals, not confirmed product requirements. Project Owner approval is required before implementation: 24-hour absolute session expiry; 256-bit cookie credential and SHA-256 verifier; production `__Host-pp_guest` Secure/HttpOnly/SameSite=Lax cookie; 10 session-creation attempts per minute per trusted source IP; 10,000 active sessions per server process; and the exact control-character policy. The API shapes, Unicode 17 grapheme implementation candidate, error codes, and local development proxy are technical recommendations subject to independent design review. Public session creation remains unavailable until the limiter and capacity behavior are implemented and tested.
+The Project Owner approved the session lifetime, qualifying activity, credential, cookie, session/Room rate limits, and username policy recorded above on 2026-10-19. These are the initial configurable W008 baseline; they are no longer pending decisions. API shapes, dependency revisions, error codes, proxy trust configuration, and exact session-expiry-to-W013 event interface remain technical design details and require specification-level review before implementation. Public session creation remains unavailable until its limiter and tests are implemented.
 
 Security references reviewed 2026-10-19: [OWASP Session Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html), [OWASP CSRF Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html), and the official [`crypto/rand` documentation](https://pkg.go.dev/crypto/rand). The grapheme dependency candidate is documented at [pkg.go.dev](https://pkg.go.dev/github.com/clipperhouse/uax29/v2/graphemes) and its [version-pinned repository](https://github.com/clipperhouse/uax29/tree/v2.7.0).
 
@@ -116,15 +117,15 @@ Security references reviewed 2026-10-19: [OWASP Session Management Cheat Sheet](
 - W009 consumes authenticated guest identity and introduces per-Room username uniqueness. W010 consumes session authorization for WebSocket establishment.
 - Username grapheme counting is not equivalent to Go rune count or UTF-16 length; dependency quality and test vectors matter.
 - In-memory sessions disappear on restart and are single-server only, consistent with MVP architecture but a deliberate limitation.
-- Approval is still required for the proposed cookie lifetime, SameSite, credential format, rate limit/capacity defaults, and Unicode control policy before implementation. The package candidate may be replaced after version/license/security review.
+- W009 must implement the approved Room rate limits and duplicate key policy; W013 must implement immediate Match forfeit on session expiry without network grace. The grapheme package candidate may be replaced after version/license/security review; the chosen dependency revision requires review before installation.
 
 ## Specification review history
 
 Review 1 at `8391d663f7176e1fddd64829f00ca18ba69e062d`: FAIL with W008-SR-01 (MAJOR, username allowlist ambiguity) and W008-SR-02 (MINOR, no interim unauthenticated session-creation limit). Remediation clarifies acceptance of other safe Unicode text and adds a configurable rate-limit requirement and public-exposure gate.
 - Review 2: PASS at specification revision `675f770f25583edd4bf9d149e53986b689172573`; both findings resolved, no new BLOCKER/MAJOR/MINOR findings. Reviewer recommends that T01 define unsafe Unicode/rendering test vectors without rejecting safe scripts. Full report: `docs/development/reviews/W008-review.md`.
 - Review 3: PASS at specification revision `41be8e8f2d984151b2fbb185cd18271a5e4fb21d`; the expanded design had no BLOCKER/MAJOR findings and one MINOR follow-up to assess embedded bidi controls. Review 4 resolved the follow-up.
-- Review 4: PASS at specification revision `97a6ff4f0c6b95420b76b45fb50ba9895dce2949`; the proposed Bidi_Control rejection is explicit, tested, and remains subject to Project Owner approval. No new findings.
-- Project Owner approval of the specification and proposed session policy is pending; implementation has not started.
+- Review 4: PASS at specification revision `97a6ff4f0c6b95420b76b45fb50ba9895dce2949`; this review predates the owner decisions below and does not apply to this revision.
+- Project Owner approved the session and username policy baseline on 2026-10-19. Independent review of this revision is pending; implementation has not started.
 
 ## Implementation validation evidence
 
