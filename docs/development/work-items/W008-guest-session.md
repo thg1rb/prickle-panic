@@ -125,7 +125,8 @@ Review 1 at `8391d663f7176e1fddd64829f00ca18ba69e062d`: FAIL with W008-SR-01 (MA
 - Review 2: PASS at specification revision `675f770f25583edd4bf9d149e53986b689172573`; both findings resolved, no new BLOCKER/MAJOR/MINOR findings. Reviewer recommends that T01 define unsafe Unicode/rendering test vectors without rejecting safe scripts. Full report: `docs/development/reviews/W008-review.md`.
 - Review 3: PASS at specification revision `41be8e8f2d984151b2fbb185cd18271a5e4fb21d`; the expanded design had no BLOCKER/MAJOR findings and one MINOR follow-up to assess embedded bidi controls. Review 4 resolved the follow-up.
 - Review 4: PASS at specification revision `97a6ff4f0c6b95420b76b45fb50ba9895dce2949`; this review predates the owner decisions below and does not apply to this revision.
-- Project Owner approved the session and username policy baseline on 2026-10-19. Independent review of this revision is pending; implementation has not started.
+- Review 5: PASS at specification and requirement revision `cd37fb4096b1da295d7736985979b382f008bcf6`; the reviewer confirmed that the approved lifetime, activity definition, credentials, cookie, session limit, username policy, and expiry-forfeit behavior are reflected consistently. No findings. Report: `docs/development/reviews/W008-review.md`. This does not authorize merge; implementation has not started.
+- Project Owner approved the session and username policy baseline on 2026-10-19.
 
 ## Implementation validation evidence
 
