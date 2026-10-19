@@ -1,6 +1,6 @@
 # W007 — Local Gameplay Prototype
 
-Status: VERIFIED
+Status: DONE
 Type: Frontend Feature
 
 ## Goal
@@ -110,4 +110,4 @@ Replace the starter screen with a polished, Thai-language, single-player local S
 
 ## Completion
 
-Require the approved specification, focused tests and browser QA evidence, CI pass, independent review PASS for the exact final PR revision, no unresolved BLOCKER/MAJOR findings, documentation synchronized, PR merge to `develop`, and retained feature branches.
+Completed: approved specification and tests; `pnpm check` and exact-head CI passed; independent review PASS for implementation `eaa32e7574e6daa13d0cf50bb8cf9835ef261367` with one documented MINOR pointer/touch verification limitation; review evidence is in `docs/development/reviews/W007-review.md`; PR #9 merged to `develop` as `3463e6d2ed75bd4f9b6ef2b9655859d295b8bb04`; feature branches retained.
