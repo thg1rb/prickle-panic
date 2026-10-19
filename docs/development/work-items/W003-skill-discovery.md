@@ -35,6 +35,24 @@ Begin the project Skill workflow with the required `find-skills` discovery Skill
 - **W003-AC-05:** Candidate discovery covers the required language, frontend/game, architecture/quality, accessibility/testing, security, infrastructure, documentation, and SDD categories; unreviewed candidates remain unapproved.
 - **W003-AC-06:** Project scope and approved registry policy are verified, and documentation/lock metadata are internally consistent.
 
+## Discovery evidence
+
+Discovery was performed with `pnpm dlx skills@1.7.2 find` on 2026-10-19. Results below are untrusted candidate leads, not security or quality approvals. No candidate in this table was installed or approved. Search output is intentionally summarized to preserve useful evidence without turning the registry into a marketplace catalog.
+
+| Category | Query | Representative result(s) observed | Disposition |
+|---|---|---|---|
+| Go practices | `Go best practices` | `samber/cc-skills-golang` testing, error-handling, security, concurrency, and lint Skills; `openai/skills@security-best-practices` | Not reviewed; unapproved |
+| TypeScript / React | `React TypeScript performance` | `vercel-labs/agent-skills@vercel-react-best-practices`; `giuseppe-trisciuoglio/developer-kit@react-patterns` | Not reviewed; unapproved |
+| Phaser / game development | `Phaser game development` | `playableintelligence/game-creator@phaser`; several Phaser 3/4 community results | Not reviewed; unapproved; Phaser version compatibility unknown |
+| Accessibility / Playwright | `accessibility testing Playwright` | `currents-dev/playwright-best-practices-skill`; `pedronauck/skills@a11y-testing` | Not reviewed; unapproved |
+| WebSocket / application security | `WebSocket security code review` and `WebSocket application security` | Search returned broad security skills, including `semgrep/skills@code-security`; no clearly scoped WebSocket result | No candidate selected; unapproved |
+| Architecture / quality / review / refactoring | `software architecture code quality refactoring` | `wondelai/skills@improve-code-quality`, `@architecture-optimization`; `nelpos/code-review-plugin@code-review` | Not reviewed; unapproved |
+| UI/UX | `UI UX design accessibility` | `anthropics/skills@frontend-design`; `vercel-labs/agent-skills@web-design-guidelines` | Not reviewed; unapproved |
+| Docker / GitHub Actions | `Docker GitHub Actions` | `samber/cc-skills-golang@golang-continuous-integration`; `davila7/claude-code-templates@github-actions-creator` | Not reviewed; unapproved |
+| Documentation / SDD | `technical documentation spec driven development` | `mattpocock/skills@grill-with-docs`, `@to-spec`, `@to-tickets` | Not reviewed; unapproved |
+
+The initial `find-skills` source and installer received a deeper review because it is mandatory. Future candidates require source authenticity, maintainer, revision, license, scripts and referenced-command inspection, compatibility, security review, and explicit registry approval before trusted use. Search popularity alone is not sufficient.
+
 ## Review focus
 
 Verify official-source authenticity, pinned revision integrity, project-only installation, absence of global mutations, correct risk characterization, and whether restricted approval is appropriate given the marketplace prompt-injection exposure.
