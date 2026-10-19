@@ -52,7 +52,7 @@ Create and recover an anonymous player identity without login, validate the play
 
 - Missing, malformed, overlong, or invalid Unicode input: reject with a stable error code and no session mutation.
 - A username of one grapheme (including a multi-codepoint grapheme), two graphemes, sixteen graphemes, and seventeen graphemes must be tested explicitly.
-- Whitespace-only, leading/trailing whitespace, internal spaces, Thai combining marks, emoji grapheme sequences, and control characters must be tested.
+- Whitespace-only, leading/trailing whitespace, internal spaces, Thai combining marks, emoji grapheme sequences (including ZWJ), Arabic text, C0/C1 controls, and each listed bidi control must be tested. Bidi controls are proposed to be rejected; ZWJ must remain accepted.
 - Credential collision: retry generation a bounded number of times, then fail safely without issuing a duplicate identity.
 - Missing, expired, malformed, unknown, or revoked cookie: return unauthenticated without revealing which credential check failed.
 - Session store capacity or entropy-source failure: fail closed and do not issue a partial session.
@@ -63,7 +63,7 @@ Create and recover an anonymous player identity without login, validate the play
 ## Acceptance criteria
 
 - **W008-AC-01:** A visitor can create a guest session with a valid username without login; server issues a unique guest ID distinct from username.
-- **W008-AC-02:** Server applies the exact §6.2 trim, grapheme-count, and unsafe-control rules; Thai, English, numbers, and internal spaces are accepted, and other safe Unicode is not rejected solely by an allowlist. Boundary and Unicode tests cover valid/invalid examples.
+- **W008-AC-02:** Server applies the exact §6.2 trim, grapheme-count, and unsafe-control rules; Thai, English, numbers, and internal spaces are accepted, and other safe Unicode is not rejected solely by an allowlist. Boundary and Unicode tests cover valid/invalid examples, including proposed rejection of Bidi_Control characters while preserving Arabic text and ZWJ emoji.
 - **W008-AC-03:** Invalid creation returns a stable error, creates no session, and sets no credential cookie.
 - **W008-AC-04:** Session credential is cryptographically unpredictable, carried in an HttpOnly cookie, never returned in JSON, never stored in localStorage, URL, or logs, and never placed in WebSocket JSON.
 - **W008-AC-05:** Recovery after refresh returns the same guest ID and username for a valid session; invalid/expired/missing credentials are uniformly unauthenticated.
@@ -83,7 +83,7 @@ Create and recover an anonymous player identity without login, validate the play
 - Proposed expiry: fixed 24-hour absolute lifetime from creation; recovery does not extend it. Inject the clock into the session manager for deterministic expiry tests. Sweep expired sessions once per minute and stop the cleanup loop on server shutdown.
 - Proposed production cookie: `__Host-pp_guest`, `Secure`, `HttpOnly`, `SameSite=Lax`, `Path=/`, no `Domain`, and `Max-Age=86400`/matching `Expires`. For local HTTP development only, use `pp_guest_dev` without `Secure`; keep it host-only, HttpOnly, SameSite=Lax, and Path `/`. Configure Vite to proxy `/api` to Go so the browser uses same-origin requests; never enable the development cookie in production.
 - Proposed session-creation limiter: configurable in-memory rolling 60-second window, default 10 attempts per source IP, applied before request-body parsing and session allocation. Return `429` with `Retry-After`. Use `RemoteAddr` unless the immediate peer is in an explicit trusted-proxy list; only then parse forwarding headers from right to left, ignoring untrusted client-supplied prefixes. Bound limiter-key storage and prune stale entries. Add an active-session capacity of 10,000 by default; reject creation when full without allocating partial state. Initial thresholds/capacity require owner approval and load/abuse review.
-- Username validation proposal: trim Go Unicode whitespace, reject invalid UTF-8 and C0/C1 control characters, then count extended grapheme clusters. Preserve all otherwise-safe Unicode and render usernames as escaped text inside a bidirectional isolation element (`<bdi dir="auto">`) in the web UI. Keep examples for Thai combining sequences, joined emoji, Arabic, and literal `<script>` text. Do not treat markup characters as executable content or reject them solely by spelling.
+- Username validation proposal: trim Go Unicode whitespace, reject invalid UTF-8, C0/C1 controls, and Unicode `Bidi_Control` characters (including U+061C, U+200E–U+200F, U+202A–U+202E, and U+2066–U+2069), then count extended grapheme clusters. Preserve all otherwise-safe Unicode, including Arabic text, ZWJ (U+200D) emoji sequences, and other safe scripts; render usernames as escaped text inside a bidirectional isolation element (`<bdi dir="auto">`) in the web UI. Do not treat markup characters as executable content or reject them solely by spelling. This is a proposed safety policy requiring Project Owner approval.
 - Grapheme dependency candidate: `github.com/clipperhouse/uax29/v2/graphemes` at v2.7.0. The package documents Unicode 17 grapheme rules, official Unicode test-suite use, and an MIT license; confirm the exact source/revision and dependency graph at implementation time. Do not install it until the specification and dependency review are approved.
 - Start with process-local storage; no persistence or distributed session dependency.
 
@@ -98,7 +98,7 @@ Create and recover an anonymous player identity without login, validate the play
 
 ## Test plan
 
-- Go unit tests for username grapheme policy, unique guest IDs, credential generation, expiry/revocation, capacity/failure behavior, limiter boundary/source parsing, and race-safe concurrent access. Include known UAX #29 vectors for Thai combining sequences, emoji joined by ZWJ, regional-indicator flags, Arabic, and Unicode 17 test data where useful; invalid UTF-8 and C0/C1 controls reject. Literal `<script>`-like text remains accepted as a username and must render inertly as text.
+- Go unit tests for username grapheme policy, unique guest IDs, credential generation, expiry/revocation, capacity/failure behavior, limiter boundary/source parsing, and race-safe concurrent access. Include known UAX #29 vectors for Thai combining sequences, emoji joined by ZWJ, regional-indicator flags, Arabic, and Unicode 17 test data where useful; invalid UTF-8, C0/C1 controls, and listed Bidi_Control code points reject under the proposed policy. Confirm U+200D ZWJ remains accepted. Literal `<script>`-like text remains accepted as a username and must render inertly as text.
 - HTTP tests for endpoint status/error mapping, 4 KiB request-body limit, cookie flags, no-cookie-on-error, Origin and Fetch Metadata behavior, limiter before body parsing/session allocation, expired-cookie clearing, and credential absence from response bodies/log hooks.
 - Frontend tests for username input, Thai errors, create/recovery bootstrap, refresh restoration, and localStorage containing display name only.
 - Security checks for dependency audit and static analysis; `pnpm check` and exact-head CI. Verify the session-creation limiter before authentication and confirm excess attempts allocate no sessions.
@@ -122,7 +122,7 @@ Security references reviewed 2026-10-19: [OWASP Session Management Cheat Sheet](
 
 Review 1 at `8391d663f7176e1fddd64829f00ca18ba69e062d`: FAIL with W008-SR-01 (MAJOR, username allowlist ambiguity) and W008-SR-02 (MINOR, no interim unauthenticated session-creation limit). Remediation clarifies acceptance of other safe Unicode text and adds a configurable rate-limit requirement and public-exposure gate.
 - Review 2: PASS at specification revision `675f770f25583edd4bf9d149e53986b689172573`; both findings resolved, no new BLOCKER/MAJOR/MINOR findings. Reviewer recommends that T01 define unsafe Unicode/rendering test vectors without rejecting safe scripts. Full report: `docs/development/reviews/W008-review.md`.
-- Review 3: pending independent review of the expanded, detailed technical design.
+- Review 3: PASS at specification revision `41be8e8f2d984151b2fbb185cd18271a5e4fb21d`; the expanded design had no BLOCKER/MAJOR findings and one MINOR follow-up to assess embedded bidi controls. Review 4 is pending after adding that proposed policy and its test vectors.
 - Project Owner approval of the specification and proposed session policy is pending; implementation has not started.
 
 ## Implementation validation evidence

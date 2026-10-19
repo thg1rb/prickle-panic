@@ -53,3 +53,34 @@ Reason: W008-SR-01 is a material behavior ambiguity and W008-SR-02 leaves an una
 PASS
 
 Reason: Both prior findings are resolved in the specification, and no blocking or major findings remain. This PASS applies to the exact specification revision above; no implementation or tests were run.
+
+## Review 3
+
+### Reviewed revision
+
+- Pull Request: #10
+- Commit SHA: `41be8e8f2d984151b2fbb185cd18271a5e4fb21d`
+- Reviewer execution reference: Independent Sub-Agent
+
+### Evidence inspected
+
+- Requirements: `docs/REQUIREMENT.md` §§6.1–6.7, 16.1, 20, and 32
+- Specification: `docs/development/work-items/W008-guest-session.md`
+- Task plan: `docs/development/work-items/W008-task-plan.md`
+- Protocol boundary: `docs/protocol/v1/README.md`
+
+### Finding
+
+| ID | Severity | Evidence and impact | Required remediation |
+|---|---|---|---|
+| W008-SR-03 | MINOR | The design covers bidi isolation in the UI but does not explicitly assess embedded Unicode bidirectional override/isolate controls. Those controls can affect the displayed order of username text despite surrounding isolation. | Explicitly assess and test bidi controls while preserving ZWJ emoji support. Keep any policy change subject to Project Owner approval. |
+
+### Decision
+
+PASS
+
+Reason: No BLOCKER or MAJOR findings remain. The MINOR follow-up is addressed in the next specification revision with a proposed rejection policy and test vectors for Bidi_Control characters, while preserving Arabic text and ZWJ emoji; that revision requires a fresh review. This review covered specifications only; no implementation or tests were inspected or run.
+
+## Review 4
+
+Pending independent review of the exact specification revision that proposes rejecting Unicode Bidi_Control characters and adds corresponding test vectors.
