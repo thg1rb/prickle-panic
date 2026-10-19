@@ -45,7 +45,7 @@ Inspect action permissions and trigger scope, dependency pinning, lockfile use, 
 
 ## Technical notes
 
-The TypeScript compiler baseline is TypeScript 7.0.2. The current `typescript-eslint` release rejects TypeScript 7.0, so the repository uses Oxlint for JS/TS linting rather than accepting an unsupported parser combination. The React `react-in-jsx-scope` rule is disabled because this Vite app uses the automatic JSX runtime. CI uses Go 1.27.2 after `govulncheck` identified fixed standard-library vulnerabilities in the prior local Go 1.25.1 toolchain; the official Go release history identifies 1.27.2 as the current security patch on 2026-10-19.
+The TypeScript compiler baseline is TypeScript 7.0.2. The current `typescript-eslint` release rejects TypeScript 7.0, so the repository uses Oxlint for JS/TS linting rather than accepting an unsupported parser combination. The React `react-in-jsx-scope` rule is disabled because this Vite app uses the automatic JSX runtime. CI uses Go 1.27.2 after `govulncheck` identified fixed standard-library vulnerabilities in the prior local Go 1.25.1 toolchain; the official Go release history identifies 1.27.2 as the current security patch on 2026-10-19. Initial CI exposed an outdated `govulncheck` parser panic with Go 1.27, so the pinned scanner was updated from v1.1.4 to v1.9.0; the newer scanner completed successfully locally.
 
 ## Completion
 
