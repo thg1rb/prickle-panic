@@ -1,6 +1,6 @@
 # W006 — Card Matching Engine
 
-Status: READY_FOR_REVIEW
+Status: DONE
 Type: Core Engine
 
 ## Goal
@@ -78,4 +78,4 @@ Proposed location: `apps/server/internal/game/` with small card, board, and scor
 
 ## Completion
 
-Require an approved specification, implementation and required validation, independent review PASS tied to the final PR SHA, no unresolved BLOCKER/MAJOR findings, documentation synchronized, merge to `develop` through a PR, retained feature branch, and actual validation/review/merge evidence recorded.
+Completed: approved specification, implementation, validation, independent review PASS, and final-head confirmation are recorded in `docs/development/reviews/W006-review.md`; implementation PR #7 merged to `develop` as `8ec3fef4ad85bdf5a3d351f4e51eaed2fa3973ab`; integration CI passed and both W006 feature branches are retained.
