@@ -1,6 +1,6 @@
 # W005 — Protocol Contracts
 
-Status: READY_FOR_REVIEW
+Status: DONE
 Type: Core Engine
 
 ## Goal
@@ -45,4 +45,4 @@ Check all message fields against §19, identity and authorization assumptions, p
 
 ## Completion
 
-Require schema fixtures/validation and all CI checks to pass, independent review PASS for the exact revision, no unresolved BLOCKER/MAJOR findings, PR merge to `develop`, and retained feature branch.
+Completed: schema fixtures/validation and CI passed, independent review PASS was recorded for the implementation and final review-evidence revision, PR #5 merged to `develop` as `1a0ac6ba0c10fa1b027ba989985dc3ef74d55e95`, and the feature branch is retained. Final PR-head review evidence is documented on PR #5; protocol implementation was reviewed at `0c9f050d6a5e5514b23598b6a646bc1f8b17084c`, with review-evidence-only final commit `f13423071461150486e78d6a12b5a9443e2a6fa5` also independently verified.
