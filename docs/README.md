@@ -8,14 +8,14 @@ Requirements use the statuses CONFIRMED, BASELINE, TUNING, PROPOSED, DEFERRED, a
 
 ## Document ownership
 
-| Area | Owner | Purpose |
-|---|---|---|
-| Product and gameplay | Project Owner | `REQUIREMENT.md`; approves material product/rule changes |
-| Architecture | Lead/Architecture Agent | `architecture/overview.md` and ADRs |
-| Feature behavior and tasks | Work Item author | Approved specifications and task plans in `development/work-items/` |
-| Engineering and testing | Maintainers / Work Item authors | Standards and test strategy as introduced by their Work Items |
-| Agent workflow and Skills | SDD Coordinator | `agents/`, templates, and Skills registry |
-| Review evidence | Independent Reviewer | Review decisions and findings associated with the reviewed commit |
+| Area | Owner | Purpose | Authoritative references | Update when |
+|---|---|---|---|---|
+| Product and gameplay | Project Owner | `REQUIREMENT.md`; approves material product/rule changes | §1–17, §22, §28, §35–40 | An approved product or gameplay decision changes |
+| Architecture | Lead/Architecture Agent | `architecture/overview.md` and ADRs | §18–20, §30–31 | An architecture decision is approved or superseded |
+| Feature behavior and tasks | Work Item author | Approved specifications and task plans in `development/work-items/` | Relevant requirement IDs named in each Work Item | Scope, acceptance, dependencies, or approved design changes |
+| Engineering and testing | Maintainers / Work Item authors | Standards and test strategy as introduced by their Work Items | §20–21, §27, §29 | Tooling, quality gates, or validation policy changes |
+| Agent workflow and Skills | SDD Coordinator | `agents/`, templates, and Skills registry | §23–26, §33–34 | Workflow or approved Skill/revision changes |
+| Review evidence | Independent Reviewer | Review decisions and findings associated with the reviewed commit | §25–26, §41 | After each independent review; preserve the reviewed revision and decision |
 
 ## Structure
 
@@ -25,7 +25,7 @@ Requirements use the statuses CONFIRMED, BASELINE, TUNING, PROPOSED, DEFERRED, a
 - `testing/` — validation policy and evidence conventions.
 - `design/` and `standards/` — create when a Work Item needs authoritative detail in those areas.
 
-Do not create empty directories or duplicate requirement content. Each derived document must identify its owner, purpose, relevant requirement references, and update conditions.
+Do not create empty directories or duplicate requirement content. Ownership, purpose, authoritative references, and update conditions may be inherited from the applicable family row above; each feature specification must still list its exact requirement IDs, and every other derived document must name its relevant requirement sections or IDs.
 
 ## Review and maintenance
 
