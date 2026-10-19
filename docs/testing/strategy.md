@@ -1,6 +1,6 @@
 # Testing and Validation Strategy
 
-This strategy implements `docs/REQUIREMENT.md` §27–29. It does not claim coverage until checks exist and results are recorded.
+This strategy implements `docs/REQUIREMENT.md` §27–29. The currently implemented baseline checks and local commands are defined in [`../development/standards.md`](../development/standards.md). It does not claim coverage until checks exist and results are recorded.
 
 ## Test levels
 

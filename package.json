@@ -10,6 +10,17 @@
     "dev": "pnpm --filter @prickle-panic/web dev",
     "build": "pnpm --filter @prickle-panic/web build",
     "typecheck": "pnpm --filter @prickle-panic/web typecheck",
-    "server:run": "go -C apps/server run ./cmd/server"
+    "server:run": "go -C apps/server run ./cmd/server",
+    "format:check": "prettier --check \"apps/**/*.{ts,tsx,js,jsx,json,css,html}\" \"*.json\" pnpm-workspace.yaml \".github/**/*.yml\"",
+    "format:write": "prettier --write \"apps/**/*.{ts,tsx,js,jsx,json,css,html}\" \"*.json\" pnpm-workspace.yaml \".github/**/*.yml\"",
+    "lint": "oxlint -D correctness -D suspicious --react-plugin --jsx-a11y-plugin --react-perf-plugin -A react-in-jsx-scope apps/web/src apps/web/vite.config.ts",
+    "go:format:check": "test -z \"$(gofmt -l apps/server)\"",
+    "test:go": "go -C apps/server test ./...",
+    "vet:go": "go -C apps/server vet ./...",
+    "check": "pnpm format:check && pnpm go:format:check && pnpm lint && pnpm typecheck && pnpm test:go && pnpm vet:go && pnpm build"
+  },
+  "devDependencies": {
+    "oxlint": "^1.88.0",
+    "prettier": "^3.9.10"
   }
 }
