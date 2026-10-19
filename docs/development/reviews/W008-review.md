@@ -131,3 +131,11 @@ No BLOCKER, MAJOR, MINOR, or SUGGESTION findings.
 ### Decision
 
 PASS. The owner-approved username rules, 24-hour idle and 7-day absolute session lifetime, qualifying activity, credential/cookie policy, session creation limit, and immediate active-Match forfeit on session expiry agree between the requirement source and W008 specification. No implementation or tests were reviewed or run. This PASS applies to specification revision `cd37fb4096b1da295d7736985979b382f008bcf6` and does not authorize merge.
+
+## Review 6 — PR scope reconciliation
+
+- Pull Request: #10
+- Reviewed PR head: `32bd3f45ae129ac0dfca9e0f9e6d41625629a90a`
+- Reviewer execution reference: Independent read-only Sub-Agent (`/root/w008_spec_review`)
+- Scope: Confirmed W008 content remains identical to the previously approved and reviewed policy revision; checked the complete PR diff for unrelated W007 edits.
+- Decision: PASS. W008 policy/specification content is unchanged; the unrelated W007 file no longer appears in the PR diff. No new findings. No implementation or tests were reviewed or run. This review does not authorize merge.
