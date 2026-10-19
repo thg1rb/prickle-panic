@@ -405,12 +405,14 @@
               "required": [
                 "matchId",
                 "accepted",
+                "outcome",
                 "boardVersion",
                 "referenceVersion"
               ],
               "properties": {
                 "matchId": { "$ref": "#/$defs/id" },
                 "accepted": { "type": "boolean" },
+                "outcome": { "enum": ["correct", "incorrect"] },
                 "boardVersion": { "type": "integer", "minimum": 0 },
                 "referenceVersion": { "type": "integer", "minimum": 0 }
               }

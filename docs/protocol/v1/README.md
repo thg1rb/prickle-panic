@@ -32,7 +32,8 @@ The WebSocket connection must already be authorized by the Guest Session mechani
 - The server serializes state mutations in the owning Room event loop and assigns increasing `seq` values to Room events. A snapshot's sequence is its synchronization watermark. A client detects a gap and requests a fresh authorized snapshot.
 - **PROPOSED for implementation design:** identical duplicate request IDs within the active Room/session return the cached terminal response without repeating side effects; reuse of an ID with different request content returns `ACTION_DUPLICATE`. W010 must implement bounded retention and document the cache lifetime.
 - `boardVersion` and `referenceVersion` describe the sender's own Speed Battle board and reference card. They are not a shared Room revision. The server still checks Match membership, player eligibility, card availability, and authoritative matching rules.
-- `game.action.result.accepted` means the server authorized and processed the request; it does not indicate whether the selected card matched. The authoritative score and board events communicate the result. Requests that cannot be safely processed use a structured `error`.
+- A successfully processed `game.pick_card` receives `game.action.result` with `accepted: true` and `outcome: "correct"` or `"incorrect"`. `accepted` means the action was authorized and processed; `outcome` is the gameplay result. A correct outcome is accompanied by the applicable score and private board updates. An incorrect outcome awards no points, resets the Combo, applies the required cooldown, and leaves score, board, and reference card unchanged. Its unchanged `boardVersion` and `referenceVersion` make that explicit; the client can still show Thai feedback from `outcome`.
+- Technical rejections, including an action during cooldown, use a structured `error` and have no gameplay outcome. They do not trigger mistake penalties. Clients must distinguish these errors from a processed pick with `outcome: "incorrect"`.
 - Match IDs ensure that messages from an earlier Match cannot affect a later Match. `seq` orders server events; it does not replace action-specific version validation.
 - **PROPOSED for implementation design:** reject a v value other than 1 with `UNSUPPORTED_VERSION` when the envelope can be parsed; otherwise close the WebSocket with a protocol error. Do not silently reinterpret an unknown version.
 
@@ -57,9 +58,11 @@ Version 1 is strict: required fields and allowed values are defined by the schem
 |---|---|
 | W005-AC-01 | Valid request, sequenced event/snapshot, correlated action result, and error fixtures. |
 | W005-AC-02 | Invalid unknown property, unsupported version, and missing action version fixtures; every payload branch has bounded values and a closed object shape. |
-| W005-AC-03 | Valid create/join/leave/ready/start/pick/snapshot request and Room/Match/score/result event fixtures. |
-| W005-AC-04 | Pick request and action result include match, board, and reference versions; snapshot request carries its last observed sequence. |
+| W005-AC-03 | Valid create/join/leave/ready/start/pick/snapshot request; correct and incorrect result; and Room/Match/score/result event fixtures. |
+| W005-AC-04 | Pick request and both action-result outcomes include match, board, and reference versions; snapshot request carries its last observed sequence. |
 | W005-AC-05 | Valid private game snapshot plus invalid `otherPlayersBoards` leakage fixture. |
 | W005-AC-06 | Valid stable `STALE_ACTION` code fixture; schema enumerates all required §19.5 codes and protocol-specific codes. |
 | W005-AC-07 | All fixtures run through `pnpm protocol:check`, also part of `pnpm check` and GitHub Actions. |
 | W005-AC-08 | This document labels unapproved transport choices PROPOSED and schemas only the Speed Battle MVP. |
+
+Both correct and incorrect processed picks have valid result fixtures. The invalid fixture `invalid/action-result-missing-outcome.json` proves that a result without a gameplay outcome is rejected.
