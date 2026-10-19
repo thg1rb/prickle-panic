@@ -64,4 +64,5 @@ Require evidence-based independent review PASS for the exact PR revision, resolv
 ## Completion evidence
 
 - Review: PASS for commit `0fe6e073566a16ad2486ac6bd5926fd412a34a4e`, recorded on PR #3.
+- Formal independent review report: [`../reviews/W003-review.md`](../reviews/W003-review.md), including exact revision, criteria, evidence, and re-review outcome.
 - PR #3 merged to `develop` as merge commit `a0da991c52c596c7ed0738a2f4cea86dedae18b9` on 2026-10-19; feature branch retained.
