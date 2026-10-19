@@ -37,3 +37,22 @@ The reviewer independently inspected the W013 specification and task plan at the
 ## Final decision
 
 PASS. All findings are resolved. No BLOCKER or MAJOR findings remain. This PASS applies only to specification revision `5a8b039436801efa4d4524c08be90a55dd065ae5`; any material later change requires review again. Implementation remains gated on the documented owner decisions and W008–W011 dependencies. This specification review does not authorize merge or implementation.
+
+## Review 2
+
+### Reviewed revision
+
+- Work Item: W013 — Reconnection & Anti-Griefing
+- Pull Request: #15, targeting `develop`
+- Reviewed revision: `e406acdad9fc7a8f992aa6bbfba349be1e335981`
+- Reviewer: Independent read-only Sub-Agent (`/root/w008_spec_review`)
+- Review type: Requirement source, specification, and task plan; no implementation review
+- Decision: PASS
+
+### Evidence and findings
+
+The reviewer confirmed that the included requirement source contains the approved W008 username/session policy, §14.4 session and Room limits, and §13.1 immediate session-expiry forfeit rule. W013 maintains the distinction between expired session authorization and unexpected network disconnection, retains the 15-second grace only for network loss, and assigns expiry to W008 and the active-Match forfeit to W013's Room loop. Acceptance criteria and tests address these paths and their races. No findings.
+
+### Final decision
+
+PASS. This review applies to specification revision `e406acdad9fc7a8f992aa6bbfba349be1e335981`; it does not authorize merge or implementation.
