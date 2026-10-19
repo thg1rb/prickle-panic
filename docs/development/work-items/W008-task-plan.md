@@ -1,6 +1,6 @@
 # Task Plan — W008: Guest Session
 
-Specification: `docs/development/work-items/W008-guest-session.md` (owner-approved policy baseline; READY_FOR_REVIEW pending exact-revision independent review)
+Specification: `docs/development/work-items/W008-guest-session.md` (SPEC_READY; owner-approved policy baseline and independent specification review PASS; PR #10 integration remains pending)
 Branch: `feature/W008-guest-session`
 
 | Task | Change | Requirement / acceptance refs | Deliverable | Validation |
