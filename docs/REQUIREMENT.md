@@ -1740,6 +1740,14 @@ Unexpected disconnection includes:
 The server must not treat every unexpected disconnection
 as an immediate voluntary forfeit.
 
+Session expiration is distinct from unexpected network disconnection. If a
+Guest Session expires during an active Match, revoke its authorization and
+forfeit that participant immediately; do not apply the 15-second network
+reconnection grace period. W008 owns expiry and authorization revocation;
+W013 applies the active-Match forfeit through the authoritative Room event
+loop. A newly created session does not regain the expired session's identity
+or Match authority.
+
 ## 13.2 Grace Period
 
 Initial reconnection grace period:
@@ -1875,16 +1883,24 @@ Initial suggested limits:
 | Operation | Initial Limit |
 |---|---|
 | Card Pick | 12 requests/second/player |
-| Create Room | 5 attempts/minute/session |
+| Guest Session Creation | At most 10 new sessions/10 minutes/source IP |
+| Create Room | 5 attempts/10 minutes/Guest Session |
 | Join Room | 20 attempts/minute/session |
 
-These limits are subject to testing.
+The session creation, Room creation, and Room joining limits are
+Project Owner-approved initial configurable baselines. They must be enforced
+server-side and reviewed during integration and abuse testing. Card Pick and
+other operation limits remain tuning values subject to testing.
 
 Protection must not rely exclusively on guest session IDs,
 because users can create new sessions.
 
 Network-source-based protection may be used carefully,
 without relying on IP address as a permanent identity.
+
+Reuse an existing valid Guest Session on page refresh. Network-source
+controls may mitigate repeated session creation, but must account for shared
+networks and must not treat source IP as permanent player identity.
 
 ## 14.5 Gameplay Cooldown
 
