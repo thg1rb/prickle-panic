@@ -38,7 +38,7 @@ Last updated: 2026-10-19
 
 ## Expected behavior
 
-1. When W011 marks a Match COMPLETED, W012 consumes one immutable final snapshot with Match ID, Room ID, each player's final score/name/opaque Player ID, and W013 eligibility/forfeit status. The server validates that it matches the active Room/Match and finalizes exactly once.
+1. When W011 marks a Match COMPLETED, W012 consumes one immutable terminal snapshot with Match ID, Room ID, each player's final score/name/opaque Player ID, and W013-resolved eligibility/forfeit status correlated to the same authoritative completion revision. The W011/W013 handoff must be atomic or versioned so a boundary eligibility change cannot be omitted or applied after finalization. The server validates that it matches the active Room/Match and finalizes exactly once.
 2. W012 ranks eligible players by descending server-recorded score. Players tied at the highest score are joint winners; shared placement uses competition ranking (e.g. 1st, 1st, 3rd). The client never calculates or submits winners.
 3. Results display final scores, player names, rankings, winners, tie status when applicable, forfeited participants, and an available Rematch action, all in Thai. Usernames render as safe text. Results projections contain no credentials, private boards, PRNG state, or internal errors.
 4. A CANCELLED Match caused by unrecoverable consistency error has no winner. All players forfeiting yields no winner; one remaining eligible competitor can be the winner after W013 resolves the grace/forfeit policy. W012 follows the server-provided terminal reason and eligibility rather than recomputing disconnect policy.
@@ -75,7 +75,7 @@ Last updated: 2026-10-19
 
 ## Acceptance criteria
 
-- **W012-AC-01:** A valid terminal W011 Match snapshot plus W013 eligibility state is finalized once by the server and bound to the correct Room/Match ID; duplicate/stale/partial snapshots cannot change the result.
+- **W012-AC-01:** A valid terminal W011 Match snapshot plus W013 eligibility state correlated to the same authoritative completion revision is finalized once by the server and bound to the correct Room/Match ID; duplicate/stale/partial snapshots cannot change the result.
 - **W012-AC-02:** Server ranks eligible players by final score, declares all top-score ties joint winners, uses shared placement (1,1,3), excludes forfeited players from winning, and produces no winner for cancelled/all-forfeit results.
 - **W012-AC-03:** Results projection contains final scores, player names, rankings, winners, tie status, forfeited status, and no private boards, credentials, PRNG state, or internal diagnostics.
 - **W012-AC-04:** Thai Results UI renders all required data safely and accessibly on desktop/mobile, including no-winner, tie, forfeited, loading, and error states.
@@ -109,7 +109,7 @@ Last updated: 2026-10-19
 ## Test plan
 
 - Go unit tests for deterministic ranking, top ties, shared placement, forfeited exclusion, no eligible winner, cancellation/no-winner, immutable projections, and malformed/inconsistent terminal input.
-- Integration tests for W011 completion event exactly once, W013 eligibility changes before terminal state, active grace preventing premature winner, Results state transition, W009 Room reset preservation, W010 duplicate/rematch request handling, and Room closure cleanup.
+- Integration tests for W011 completion event exactly once, W013 eligibility changes at and before the completion boundary, active grace preventing premature winner, version-correlated terminal snapshots, Results state transition, W009 Room reset preservation, W010 duplicate/rematch request handling, and Room closure cleanup.
 - Frontend component tests for Thai rank/tie/winner/forfeit/no-winner/error/loading UI, safe username rendering, accessible semantics, and authoritative navigation only after server response.
 - Browser E2E with 2–6 clients covers timer end, score/result consistency, ties, forfeit, Results display, Room state return, readiness reset, starting a new Match with new ID and reset state, plus mobile viewport.
 - Run `pnpm check`, protocol fixtures, Go tests/race/vet, CI/security checks, and record actual results per criterion. Browser/E2E environment limitations must be NOT_RUN/BLOCKED with evidence, not implied pass.
