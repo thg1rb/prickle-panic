@@ -89,7 +89,8 @@ Replace the starter screen with a polished, Thai-language, single-player local S
 - Unit/component validation: `pnpm check` passed locally; includes 12 frontend tests, all 1,024 ordered card-pair checks, protocol fixtures, Go tests, formatting, lint, type check, vet, and production build.
 - Desktop browser QA: the local 4×4 board rendered as a 640×640 Phaser canvas with 16 descriptively labelled controls. A keyboard-selected valid card advanced score to 1 and displayed the Thai success message.
 - Mobile browser QA: at a 320×568 CSS-pixel viewport, the document measured 320×568 with no horizontal or vertical overflow. The board measured 296×296 and each card control measured approximately 65×65 CSS pixels. Keyboard focus was visible and usable.
-- Phaser canvas initialization was observed in the browser. Pointer events sent synthetically by the browser evaluation tool did not exercise Phaser's input path; physical mouse/touch selection and scene destruction on unmount still require independent browser review or manual verification.
+- Phaser canvas initialization and cleanup were observed in the browser: one canvas existed in gameplay and zero remained after returning home. Synthetic pointer events sent by the browser evaluation tool did not exercise Phaser's input path; physical mouse/touch selection remains unverified in this environment.
+- Page title, Thai document language, and meta description were verified in the browser and are populated from the Thai translation module.
 - Build emitted the expected lazy Phaser chunk at 1.37 MB uncompressed (357.33 kB gzip); Vite reports its generic 500 kB chunk advisory.
 
 ## Independent review focus

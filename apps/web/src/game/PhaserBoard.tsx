@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { LocalCard } from "./localSpeedBattle";
-import { describeCard } from "./cocoCardVariant";
-import { th } from "../i18n/th";
+import { describeCardTh, th } from "../i18n/th";
 
 type PhaserBoardProps = {
   cards: readonly LocalCard[];
@@ -135,7 +134,7 @@ export function PhaserBoard({
             type="button"
             key={card.id}
             data-variant={card.variant}
-            aria-label={`${th.game.cardPrefix} ${index + 1} ${describeCard(card.variant)}`}
+            aria-label={`${th.game.cardPrefix} ${index + 1} ${describeCardTh(card.variant)}`}
             disabled={disabled}
             onClick={() => onSelect(card.id)}
           />

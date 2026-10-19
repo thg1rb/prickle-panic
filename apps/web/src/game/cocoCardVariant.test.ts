@@ -3,11 +3,11 @@ import {
   ATTRIBUTE_COUNT,
   VARIANT_COUNT,
   cardAttributes,
-  describeCard,
   hammingDistance,
   isCardVariant,
   isValidPick,
 } from "./cocoCardVariant";
+import { describeCardTh } from "../i18n/th";
 
 describe("Coco card variants", () => {
   it("covers exactly the 32 five-attribute variations", () => {
@@ -32,8 +32,8 @@ describe("Coco card variants", () => {
 
   it("maps binary attributes in the documented order and describes them in Thai", () => {
     expect(cardAttributes(0b10110)).toEqual([true, false, true, true, false]);
-    expect(describeCard(0b10110)).toContain("ตัวสีครีม");
-    expect(describeCard(0b10110)).toContain("ใส่แว่น");
+    expect(describeCardTh(0b10110)).toContain("ตัวสีครีม");
+    expect(describeCardTh(0b10110)).toContain("ใส่แว่น");
     expect(isCardVariant(31)).toBe(true);
     expect(isCardVariant(32)).toBe(false);
   });

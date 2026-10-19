@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { th } from "./i18n/th";
-import { describeCard } from "./game/cocoCardVariant";
+import { describeCardTh, th } from "./i18n/th";
 import {
   createLocalSpeedBattle,
   pickLocalCard,
@@ -47,7 +46,7 @@ function App() {
   }, []);
 
   if (screen === "game" && game?.status === "playing") {
-    const referenceDescription = describeCard(game.reference);
+    const referenceDescription = describeCardTh(game.reference);
     const cooldownActive = nowMs < game.cooldownUntilMs;
     return (
       <main className="app-shell game-shell" lang="th">
@@ -62,7 +61,7 @@ function App() {
           <p className="game-mode-label">{th.home.mode}</p>
           <div
             className="time-pill"
-            aria-label={`${th.game.timer} ${game.remainingSeconds} วินาที`}
+            aria-label={`${th.game.timer} ${game.remainingSeconds} ${th.seconds}`}
           >
             <span className="time-berry" aria-hidden="true">
               ●
@@ -233,7 +232,9 @@ function App() {
         </span>
       </section>
 
-      <footer className="home-footer">{th.brand} · เล่นในเครื่องนี้</footer>
+      <footer className="home-footer">
+        {th.brand} · {th.footer}
+      </footer>
     </main>
   );
 }

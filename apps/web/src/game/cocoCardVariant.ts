@@ -47,15 +47,3 @@ export function hammingDistance(reference: number, selected: number): number {
 export function isValidPick(reference: number, selected: number): boolean {
   return hammingDistance(reference, selected) <= 1;
 }
-
-export function describeCard(variant: number): string {
-  const [bodyCream, longQuills, glasses, scarf, strawberry] =
-    cardAttributes(variant);
-  return [
-    bodyCream ? "ตัวสีครีม" : "ตัวสีน้ำตาล",
-    longQuills ? "ขนยาว" : "ขนสั้น",
-    glasses ? "ใส่แว่น" : "ไม่ใส่แว่น",
-    scarf ? "มีผ้าพันคอ" : "ไม่มีผ้าพันคอ",
-    strawberry ? "มีสตรอว์เบอร์รี" : "ไม่มีสตรอว์เบอร์รี",
-  ].join(" ");
-}
