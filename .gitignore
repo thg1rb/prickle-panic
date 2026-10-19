@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# Go build outputs
+/apps/server/bin/
+/apps/server/coverage.out
