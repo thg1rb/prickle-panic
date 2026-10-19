@@ -1,6 +1,6 @@
 # W008 — Guest Session
 
-Status: READY_FOR_REVIEW
+Status: SPEC_READY
 Type: Backend and Frontend Feature
 
 ## Goal
