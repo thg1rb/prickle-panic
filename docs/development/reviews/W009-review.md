@@ -63,4 +63,21 @@ Reason: W009-SR-01 through W009-SR-04 are resolved, but W009-SR-05 remains a mat
 
 ## Review 3
 
-Pending independent re-review of the clarification to W009-SR-05.
+### Reviewed revision
+
+- Pull Request: #11
+- Commit SHA: `48d7d76f0fafa545d72938942c2d5e400a0ad4ed`
+- Reviewer execution reference: Independent Sub-Agent
+- Review scope: Specification and task plan only; no implementation or tests were inspected or run.
+
+### Re-review results
+
+- W009-SR-05 — RESOLVED. The specification distinguishes retained Room memberships from active connection authority, requires W010 to enforce INV-004 globally per Guest Session, revokes the replaced connection's authority, and signals W013 through unexpected-disconnect handling.
+- Acceptance and test plans cover stale connection contexts, concurrent Room connections, replacement revocation, and W013 signaling.
+- No new findings.
+
+### Decision
+
+PASS
+
+Reason: The Room membership model no longer implies simultaneous active authority and remains consistent with INV-004. Multiple memberships remain allowed; no implicit leave or forfeit is introduced. This is a specification-only review; no implementation or tests were inspected or run.
