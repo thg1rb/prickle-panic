@@ -1,11 +1,11 @@
 # Task Plan — W008: Guest Session
 
-Specification: `docs/development/work-items/W008-guest-session.md` (SPEC_READY; owner-approved policy baseline and independent specification review PASS; PR #10 integration remains pending)
-Branch: `feature/W008-guest-session`
+Specification: `docs/development/work-items/W008-guest-session.md` (SPEC_READY; approved policy integrated by PR #10; T01 design PASS at `3d9ed43a3215f339e19f10464aaedfa241f866f8`; T01 PR integration pending)
+Branch: `feature/W008-guest-session-design` (T01 design only; based on develop after PR #10)
 
 | Task | Change | Requirement / acceptance refs | Deliverable | Validation |
 |---|---|---|---|---|
-| T01 | Finalize API, expiry activity semantics, expiry-to-W013 event contract, cookie dev/prod split, trusted-proxy policy, grapheme dependency, Origin/CSRF, and limiter details | §§6.1–6.7, §20 SEC-006, W008-AC-04–07, 09 | Reviewed technical design and ADR only for material architecture decisions | Independent design review; implementation gated on exact-revision spec PASS and integration contracts |
+| T01 | Finalize API, expiry activity semantics, expiry-to-W010/W013 event contract, cookie dev/prod split, trusted-proxy policy, grapheme/NFC dependencies, Origin/CSRF behavior, and limiter details | §§6.1–6.7, §20 SEC-006, W008-AC-04–07, 09 | Reviewed technical design in W008 specification; ADR only if a material architecture decision requires one | Documentation consistency, requirement traceability, `git diff --check`, `pnpm check`, independent exact-revision design review; implementation gated on T01 PR integration and authorization |
 | T02 | Implement pure guest-session domain, configurable idle/absolute expiry, credential verifier/revocation, creation limiter, and strict username validator | FR-001–003, W008-AC-01–02, 06–07, 09 | `apps/server/internal/session/` | Deterministic expiry/activity tests; Unicode grapheme and approved-input tests; limiter boundary, concurrency and cleanup tests; `go test`, `go vet` |
 | T03 | Add same-origin HTTP session creation and recovery adapter with secure production cookie and isolated development configuration | FR-003, FR-007, §20 SEC-006, W008-AC-03–07, 09 | Versioned HTTP endpoints, cookie policy, API errors, Vite `/api` proxy | HTTP tests for attributes, Origin, Fetch Metadata, expiry, limits, reuse, no credential leakage; security review |
 | T04 | Add Thai client username entry and session bootstrap/recovery | FR-001–004, W008-AC-08 | React entry and recovery flow; display-name persistence only | Frontend component/state tests; browser refresh/session behavior |
@@ -31,3 +31,16 @@ Branch: `feature/W008-guest-session`
 - [ ] Blocking findings resolved and re-reviewed
 - [ ] Documentation synchronized
 - [ ] PR merged to `develop`; feature branch retained
+
+## T01 design acceptance
+
+- [x] HTTP request/response, status/error, cookie, reuse, and Origin contract is explicit.
+- [x] Credential lifecycle, effective expiration, qualifying activity, invalidation, and cleanup are explicit and preserve §6.5.
+- [x] Trusted-proxy source resolution and successful-allocation-only rolling session quota are explicit and testable.
+- [x] Username validation order, Unicode cases, and W009 duplicate-key boundary are explicit and preserve §6.2.
+- [x] W008-to-W010/W013 expiry event ownership, ordering, idempotency, and deadline tie behavior are explicit without circular dependencies.
+- [x] Session expiry and Match deadlines share one monotonic clock domain; UTC remains diagnostic, with wall-clock adjustment and delayed-delivery boundary tests specified.
+- [x] Proactive session expiry emits the event at the authoritative deadline without requiring a later request or active socket; scheduler state is bounded by active sessions and shuts down cleanly.
+- [x] Selected NFC/grapheme dependency versions, licenses, source, and implementation-time checks are recorded; no dependency is installed during T01.
+- [x] Owner approval of equal-time Match-deadline precedence is recorded and flagged for synchronization into W013 before its implementation.
+- [x] Independent reviewer PASS covers the final design revision; T02 implementation has not started.
