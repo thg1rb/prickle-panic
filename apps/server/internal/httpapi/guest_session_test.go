@@ -207,6 +207,7 @@ func TestStrictRequestValidation(t *testing.T) {
 		{"trailing JSON", []byte(`{"username":"Coco"} {}`), 400, "REQUEST_INVALID"},
 		{"missing field", []byte(`{}`), 400, "REQUEST_INVALID"},
 		{"wrong type", []byte(`{"username":4}`), 400, "REQUEST_INVALID"},
+		{"null type", []byte(`{"username":null}`), 400, "REQUEST_INVALID"},
 		{"invalid UTF-8", []byte{'{', '"', 'u', 's', 'e', 'r', 'n', 'a', 'm', 'e', '"', ':', '"', 0xff, '"', '}'}, 400, "REQUEST_INVALID"},
 		{"invalid username", []byte(`{"username":"<script>"}`), 400, "USERNAME_INVALID"},
 		{"oversized", []byte(`{"username":"` + strings.Repeat("a", maxRequestBytes) + `"}`), 413, "REQUEST_TOO_LARGE"},

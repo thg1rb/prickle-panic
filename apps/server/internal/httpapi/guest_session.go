@@ -272,8 +272,12 @@ func parseUsernameObject(data []byte) (string, error) {
 			return "", errors.New("unexpected or duplicate field")
 		}
 		seen = true
-		if err = dec.Decode(&username); err != nil {
+		var raw json.RawMessage
+		if err = dec.Decode(&raw); err != nil {
 			return "", err
+		}
+		if len(raw) == 0 || raw[0] != '"' || json.Unmarshal(raw, &username) != nil {
+			return "", errors.New("username must be a JSON string")
 		}
 	}
 	tok, err = dec.Token()
