@@ -27,10 +27,10 @@ Current execution: T02 — IN_PROGRESS. T03 HTTP/cookie work and T04 frontend wo
 ## Completion evidence
 
 - [x] Exact-revision specification review PASS and approved architecture followed
-- [ ] Actual validation outcomes recorded in `docs/development/implementation-reports/W008.md`
-- [ ] Independent review PASS for exact commit SHA
-- [ ] Blocking findings resolved and re-reviewed
-- [ ] Documentation synchronized
+- [x] Actual validation outcomes recorded in `docs/development/implementation-reports/W008.md`
+- [x] Independent review PASS for exact commit SHA `b24338a1d3d987e6fe23ff3dc2c39c9bc29ef615`
+- [x] Blocking findings resolved and re-reviewed; two MINOR test gaps were also corrected and re-reviewed
+- [x] Documentation synchronized
 - [ ] PR merged to `develop`; feature branch retained
 
 ## T01 design acceptance
