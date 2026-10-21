@@ -305,7 +305,15 @@ func (h *Handler) readCredential(r *http.Request) (string, bool, bool) {
 }
 
 func (h *Handler) resolveSource(r *http.Request) (string, error) {
-	ip, err := h.clientIP.Resolve(r.RemoteAddr, r.Header.Get("X-Forwarded-For"))
+	forwarded := r.Header.Values("X-Forwarded-For")
+	if len(forwarded) > 1 {
+		return "", clientip.ErrInvalidSource
+	}
+	var chain string
+	if len(forwarded) == 1 {
+		chain = forwarded[0]
+	}
+	ip, err := h.clientIP.Resolve(r.RemoteAddr, chain)
 	if err != nil || !ip.IsValid() {
 		return "", clientip.ErrInvalidSource
 	}

@@ -351,6 +351,24 @@ func TestTrustedProxyFailureAndUntrustedForwardedHeader(t *testing.T) {
 	}
 }
 
+func TestTrustedProxyRejectsMultipleForwardedFieldLines(t *testing.T) {
+	trusted, err := clientip.NewResolver([]netip.Prefix{netip.MustParsePrefix("10.0.0.0/24")}, 32)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := setup(t, Development, 10, trusted)
+	r := postRequest(`{"username":"Coco"}`, nil)
+	r.RemoteAddr = "10.0.0.2:1000"
+	r.Header.Add("X-Forwarded-For", "198.51.100.9")
+	r.Header.Add("X-Forwarded-For", "203.0.113.8")
+	rec := httptest.NewRecorder()
+	s.handler.ServeHTTP(rec, r)
+	assertError(t, rec, http.StatusServiceUnavailable, "SESSION_UNAVAILABLE")
+	if len(rec.Result().Cookies()) != 0 {
+		t.Fatal("ambiguous forwarded metadata issued a session cookie")
+	}
+}
+
 func TestDevelopmentCookieIsExplicitAndProductionRequiresHTTPS(t *testing.T) {
 	s := setup(t, Development, 10, nil)
 	rec := httptest.NewRecorder()
