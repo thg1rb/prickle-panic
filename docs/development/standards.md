@@ -14,6 +14,18 @@ Oxlint is used for JS/TS linting because the current `typescript-eslint` parser 
 
 Formatting changes may be applied with `pnpm format:write`. Go formatting is performed with `gofmt`; `pnpm go:format:check` reports failure without changing files.
 
+## Guest Session API development
+
+Run the backend with an explicit local-only configuration:
+
+```sh
+APP_ENV=development APP_ORIGIN=http://localhost:5173 pnpm server:run
+```
+
+The local API cookie is `prickle_guest_dev`; its non-Secure transport policy is available only in development mode. Production requires `APP_ENV=production` and an HTTPS `APP_ORIGIN`, and uses the fixed Secure `__Host-prickle_guest` cookie. Cookie security attributes are selected by the server mode rather than user-supplied flags.
+
+The Vite development server proxies `/api` to `http://127.0.0.1:8080` by default. Set `VITE_API_PROXY_TARGET` when the backend listens elsewhere. Set `TRUSTED_PROXY_CIDRS` only to the verified reverse-proxy ranges; direct connections are used for source-IP limits when it is empty. Session and expiry settings can be overridden with `SESSION_IDLE_TTL`, `SESSION_ABSOLUTE_TTL`, `SESSION_CREATION_LIMIT`, `SESSION_CREATION_WINDOW`, `SESSION_MAX_SOURCE_KEYS`, `SESSION_EXPIRY_OUTBOX_CAPACITY`, `SESSION_EXPIRY_RETRY_MIN`, and `SESSION_EXPIRY_RETRY_MAX`. Defaults remain 24 hours, 7 days, 10 allocations per 10 minutes, and the approved bounded event-delivery values.
+
 ## Pull request CI
 
 `.github/workflows/ci.yml` runs on pull requests targeting `develop` or `main` and on pushes to those integration/release branches. The `validate` job checks frozen dependency installation, formatting, lint, type checking, Go tests/vet, frontend build, JavaScript production dependency advisories, and Go known vulnerabilities.

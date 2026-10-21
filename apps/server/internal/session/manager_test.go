@@ -112,6 +112,12 @@ func TestCreateLookupRevokeAndRedaction(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if created.AbsoluteRemaining != m.cfg.AbsoluteTTL {
+		t.Fatalf("created absolute remaining = %s, want %s", created.AbsoluteRemaining, m.cfg.AbsoluteTTL)
+	}
+	if !created.AbsoluteExpiresAt.Equal(c.Now().UTC.Add(m.cfg.AbsoluteTTL)) {
+		t.Fatalf("created absolute expiry = %s, want %s", created.AbsoluteExpiresAt, c.Now().UTC.Add(m.cfg.AbsoluteTTL))
+	}
 	token := created.Credential.CookieValue()
 	if len(token) < 40 {
 		t.Fatalf("credential too short: %d", len(token))
@@ -142,6 +148,51 @@ func TestCreateLookupRevokeAndRedaction(t *testing.T) {
 	}
 	if _, err = m.Lookup(created.Credential.CookieValue()); !errors.Is(err, ErrUnauthenticated) {
 		t.Fatalf("revoked lookup: %v", err)
+	}
+}
+
+func TestCreationCapacityPreflightDoesNotReserveQuota(t *testing.T) {
+	c := newTestClock()
+	m := newManager(t, c, sinkFunc(func(context.Context, ExpiryEvent) error { return nil }), func(cfg *Config) {
+		cfg.CreationLimit = 1
+	})
+	for i := 0; i < 3; i++ {
+		if err := m.CheckCreationCapacity("192.0.2.44"); err != nil {
+			t.Fatalf("preflight %d failed before allocation: %v", i, err)
+		}
+	}
+	if _, err := m.Create("Coco", "192.0.2.44"); err != nil {
+		t.Fatalf("allocation after non-consuming preflight failed: %v", err)
+	}
+	err := m.CheckCreationCapacity("192.0.2.44")
+	var limited RateLimitError
+	if !errors.As(err, &limited) || limited.RetryAfter <= 0 {
+		t.Fatalf("expected quota error after one successful allocation, got %v", err)
+	}
+}
+
+func TestAuthorizedLookupReturnsMonotonicAbsoluteLifetime(t *testing.T) {
+	c := newTestClock()
+	absolute := 3 * time.Hour
+	m := newManager(t, c, sinkFunc(func(context.Context, ExpiryEvent) error { return nil }), func(cfg *Config) {
+		cfg.IdleTTL = 20 * time.Minute
+		cfg.AbsoluteTTL = absolute
+	})
+	created, err := m.Create("Coco", "192.0.2.45")
+	if err != nil {
+		t.Fatal(err)
+	}
+	c.Advance(11 * time.Minute)
+	authorized, err := m.LookupAuthorized(created.Credential.CookieValue())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if authorized.AbsoluteRemaining != absolute-11*time.Minute {
+		t.Fatalf("absolute remaining = %s, want %s", authorized.AbsoluteRemaining, absolute-11*time.Minute)
+	}
+	wantExpiry := created.Identity.CreatedAtUTC.Add(absolute)
+	if !authorized.AbsoluteExpiresAt.Equal(wantExpiry) {
+		t.Fatalf("absolute expiration = %s, want %s", authorized.AbsoluteExpiresAt, wantExpiry)
 	}
 }
 

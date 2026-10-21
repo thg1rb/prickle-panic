@@ -63,6 +63,15 @@ type Identity struct {
 	CreatedAtUTC time.Time
 	ExpiresAtUTC time.Time
 }
+
+// Authorization contains the current identity and the remaining absolute
+// lifetime measured in the manager's monotonic clock domain.
+type Authorization struct {
+	Identity          Identity
+	AbsoluteRemaining time.Duration
+	AbsoluteExpiresAt time.Time
+}
+
 type Credential struct{ value string }
 
 func (c Credential) CookieValue() string         { return c.value }
@@ -71,8 +80,10 @@ func (Credential) GoString() string              { return "[REDACTED]" }
 func (Credential) Format(s fmt.State, verb rune) { _, _ = io.WriteString(s, "[REDACTED]") }
 
 type Created struct {
-	Identity   Identity
-	Credential Credential
+	Identity          Identity
+	Credential        Credential
+	AbsoluteRemaining time.Duration
+	AbsoluteExpiresAt time.Time
 }
 
 type record struct {
@@ -245,7 +256,45 @@ func (m *Manager) Create(rawUsername, sourceIP string) (Created, error) {
 	a.ticks = append(a.ticks, now.Tick)
 	m.allocations[sourceIP] = a
 	m.signal()
-	return Created{Identity: identity, Credential: Credential{value: credential}}, nil
+	return Created{
+		Identity:          identity,
+		Credential:        Credential{value: credential},
+		AbsoluteRemaining: m.cfg.AbsoluteTTL,
+		AbsoluteExpiresAt: now.UTC.Add(m.cfg.AbsoluteTTL),
+	}, nil
+}
+
+// CheckCreationCapacity is a non-consuming preflight for bounded HTTP request
+// processing. Create repeats the check atomically with allocation, so callers
+// must still handle a concurrent request exhausting the quota in between.
+func (m *Manager) CheckCreationCapacity(sourceIP string) error {
+	ip, err := netip.ParseAddr(sourceIP)
+	if err != nil {
+		return ErrUnavailable
+	}
+	sourceIP = ip.Unmap().String()
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if m.closed {
+		return ErrClosed
+	}
+	if m.pending > 0 {
+		return ErrBackpressure
+	}
+	now := m.cfg.Clock.Now()
+	m.pruneAllocations(now.Tick)
+	a, exists := m.allocations[sourceIP]
+	if !exists && len(m.allocations) >= m.cfg.MaxSourceKeys {
+		return ErrUnavailable
+	}
+	if len(a.ticks) >= m.cfg.CreationLimit {
+		wait := m.cfg.CreationWindow - (now.Tick - a.ticks[0])
+		if wait < 0 {
+			wait = 0
+		}
+		return RateLimitError{RetryAfter: wait}
+	}
+	return nil
 }
 
 type RateLimitError struct{ RetryAfter time.Duration }
@@ -255,35 +304,57 @@ func (e RateLimitError) Is(target error) bool { return target == ErrRateLimited 
 
 // Lookup authorizes a credential without extending idle expiry. Call
 // RecordActivity only after an authenticated application operation succeeds.
-func (m *Manager) Lookup(credential string) (Identity, error) { return m.lookup(credential, false) }
+func (m *Manager) Lookup(credential string) (Identity, error) {
+	a, err := m.LookupAuthorized(credential)
+	return a.Identity, err
+}
+
+// LookupAuthorized authorizes without extending idle expiry and returns the
+// absolute lifetime needed to bound the browser cookie.
+func (m *Manager) LookupAuthorized(credential string) (Authorization, error) {
+	return m.lookup(credential, false)
+}
 
 // Recover authorizes an explicit session-recovery request, which qualifies as
 // authenticated activity under the approved session policy.
-func (m *Manager) Recover(credential string) (Identity, error) { return m.lookup(credential, true) }
+func (m *Manager) Recover(credential string) (Identity, error) {
+	a, err := m.RecoverAuthorized(credential)
+	return a.Identity, err
+}
 
-func (m *Manager) lookup(credential string, qualifyingActivity bool) (Identity, error) {
+// RecoverAuthorized records qualifying recovery activity and returns the
+// remaining absolute lifetime from the same monotonic sample.
+func (m *Manager) RecoverAuthorized(credential string) (Authorization, error) {
+	return m.lookup(credential, true)
+}
+
+func (m *Manager) lookup(credential string, qualifyingActivity bool) (Authorization, error) {
 	if len(credential) > 128 {
-		return Identity{}, ErrUnauthenticated
+		return Authorization{}, ErrUnauthenticated
 	}
 	hash := sha256.Sum256([]byte(credential))
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	r := m.byHash[hash]
 	if r == nil {
-		return Identity{}, ErrUnauthenticated
+		return Authorization{}, ErrUnauthenticated
 	}
 	now := m.cfg.Clock.Now()
 	if now.Tick >= r.deadline {
 		m.expireLocked(r, now)
-		return Identity{}, ErrUnauthenticated
+		return Authorization{}, ErrUnauthenticated
 	}
 	if m.pending > 0 {
-		return Identity{}, ErrBackpressure
+		return Authorization{}, ErrBackpressure
 	}
 	if qualifyingActivity {
 		m.touchLocked(r, now)
 	}
-	return r.identity, nil
+	return Authorization{
+		Identity:          r.identity,
+		AbsoluteRemaining: r.createdTick + m.cfg.AbsoluteTTL - now.Tick,
+		AbsoluteExpiresAt: r.identity.CreatedAtUTC.Add(m.cfg.AbsoluteTTL),
+	}, nil
 }
 
 // RecordActivity extends only the idle deadline and must be called after the

@@ -1,8 +1,8 @@
 # Task Plan — W008: Guest Session
 
 Specification: `docs/development/work-items/W008-guest-session.md` (SPEC_READY; approved policy integrated by PR #10; T01 design PASS at `3d9ed43a3215f339e19f10464aaedfa241f866f8`; integrated by PR #18 merge commit `774ec869a2ac2c96914cfb60a0bfe9cb7b70a08d`)
-Branch: `feature/W008-guest-session-implementation` (T02 implementation; based on updated develop at `774ec869a2ac2c96914cfb60a0bfe9cb7b70a08d`)
-Current execution: T02 — VERIFIED. PR #19 is open and `validate` passed on head `4a74a1771cd403e6cf81acdf267ae1505fc71af6`; merge remains outside current authorization. T03 HTTP/cookie work and T04 frontend work have not started.
+T02 branch: `feature/W008-guest-session-implementation`; integrated by PR #19 Merge Commit `c319fb78a6a9c2438738c2007ba0d9e11603e436`, with the feature branch retained.
+Current execution: T03 — VERIFIED on `feature/W008-guest-session-http`, based on `develop` at `c319fb78a6a9c2438738c2007ba0d9e11603e436`. Independent review PASS covers implementation revision `aee0fe99dd74aa3b93bc8570be0cbdbb2bc8f7bb`; PR #20 is open against `develop` and required CI passes. T03 awaits separate Project Owner merge authorization. T04 has not started. T05 remains a later cross-task W008 completion item and is not being started separately.
 
 | Task | Change | Requirement / acceptance refs | Deliverable | Validation |
 |---|---|---|---|---|
@@ -10,7 +10,7 @@ Current execution: T02 — VERIFIED. PR #19 is open and `validate` passed on hea
 | T02 | Implement pure guest-session domain, configurable idle/absolute expiry, credential verifier/revocation, creation limiter, trusted source resolution, and strict username validator | FR-001–003, W008-AC-01–02, 06–07, 09 | `apps/server/internal/session/`, `apps/server/internal/clientip/`, and `apps/server/internal/clock/` | Deterministic expiry/activity tests; Unicode grapheme and approved-input tests; limiter boundary, proxy trust, concurrency and cleanup tests; bounded expiry outbox/retry/backpressure and race tests; `go test`, `go test -race`, `go vet` |
 | T03 | Add same-origin HTTP session creation and recovery adapter with secure production cookie and isolated development configuration | FR-003, FR-007, §20 SEC-006, W008-AC-03–07, 09 | Versioned HTTP endpoints, cookie policy, API errors, Vite `/api` proxy | HTTP tests for attributes, Origin, Fetch Metadata, expiry, limits, reuse, no credential leakage; security review |
 | T04 | Add Thai client username entry and session bootstrap/recovery | FR-001–004, W008-AC-08 | React entry and recovery flow; display-name persistence only | Frontend component/state tests; browser refresh/session behavior |
-| T05 | Integrate docs, validation and evidence; request exact-head independent implementation review | W008-AC-09–10 | Implementation report and PR evidence | `pnpm check`, CI/security checks, independent review PASS and re-review after material fixes |
+| T05 | Reconcile whole-Work-Item evidence after T03 and T04; verify remaining W008-AC-09–10 coverage | W008-AC-09–10 | Final W008 integration report and completion evidence | Full W008 acceptance coverage, exact-head review, CI/security checks, and approved PR integrations |
 
 ## Dependencies
 
@@ -31,7 +31,8 @@ Current execution: T02 — VERIFIED. PR #19 is open and `validate` passed on hea
 - [x] Independent review PASS for exact commit SHA `b24338a1d3d987e6fe23ff3dc2c39c9bc29ef615`
 - [x] Blocking findings resolved and re-reviewed; two MINOR test gaps were also corrected and re-reviewed
 - [x] Documentation synchronized
-- [ ] PR merged to `develop`; feature branch retained
+- [x] PR #19 merged to `develop` as `c319fb78a6a9c2438738c2007ba0d9e11603e436`; feature branch retained
+- [x] T03 developer validation completed and recorded; independent review PASS at `aee0fe99dd74aa3b93bc8570be0cbdbb2bc8f7bb`
 
 ## T01 design acceptance
 
