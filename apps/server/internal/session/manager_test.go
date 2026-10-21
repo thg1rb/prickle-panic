@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 	"sync"
 	"testing"
@@ -168,7 +169,9 @@ func TestCredentialUniquenessCollisionRetryAndEntropyFailure(t *testing.T) {
 	if _, err := m.Lookup(b.Credential.CookieValue()); err != nil {
 		t.Fatalf("retried credential lookup: %v", err)
 	}
-	failing := newManager(t, c, sinkFunc(func(context.Context, ExpiryEvent) error { return nil }), func(cfg *Config) { cfg.Random = iotest.ErrReader(errors.New("entropy unavailable")) })
+	failing := newManager(t, c, sinkFunc(func(context.Context, ExpiryEvent) error { return nil }), func(cfg *Config) {
+		cfg.Random = io.MultiReader(bytes.NewReader(bytes.Repeat([]byte{5}, 16)), iotest.ErrReader(errors.New("credential entropy unavailable")))
+	})
 	if _, err := failing.Create("CC", "192.0.2.2"); !errors.Is(err, ErrUnavailable) {
 		t.Fatalf("entropy failure must fail closed: %v", err)
 	}
@@ -189,11 +192,15 @@ func TestIdleAndAbsoluteDeadlineUseMonotonicTicks(t *testing.T) {
 		t.Fatal(err)
 	}
 	c.ShiftWall(48 * time.Hour)
-	c.Advance(9 * time.Second)
-	if _, err = m.Lookup(created.Credential.CookieValue()); err != nil {
-		t.Fatalf("idle refresh lost: %v", err)
+	c.Advance(8 * time.Second)
+	if _, err = m.RecordActivity(created.Identity.GuestID); err != nil {
+		t.Fatalf("successful activity did not refresh idle expiry: %v", err)
 	}
 	c.Advance(8 * time.Second)
+	if _, err = m.RecordActivity(created.Identity.GuestID); err != nil {
+		t.Fatalf("activity should still be valid immediately before absolute deadline: %v", err)
+	}
+	c.Advance(time.Second)
 	if _, err = m.RecordActivity(created.Identity.GuestID); !errors.Is(err, ErrUnauthenticated) {
 		t.Fatalf("absolute expiry must not extend: %v", err)
 	}
