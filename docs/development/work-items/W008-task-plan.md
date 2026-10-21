@@ -2,7 +2,7 @@
 
 Specification: `docs/development/work-items/W008-guest-session.md` (SPEC_READY; approved policy integrated by PR #10; T01 design PASS at `3d9ed43a3215f339e19f10464aaedfa241f866f8`; integrated by PR #18 merge commit `774ec869a2ac2c96914cfb60a0bfe9cb7b70a08d`)
 T02 branch: `feature/W008-guest-session-implementation`; integrated by PR #19 Merge Commit `c319fb78a6a9c2438738c2007ba0d9e11603e436`, with the feature branch retained.
-Current execution: T03 was integrated by PR #20 Merge Commit `3cfe2eb2305c41bd5bd4a618fc36aa9f3627060f`; its source branch is retained. T04 is in progress on `feature/W008-guest-session-frontend`, based on that updated `develop`. Developer validation and browser smoke are recorded in `docs/development/implementation-reports/W008.md`; independent review and PR integration remain pending. T05 remains a later cross-task W008 completion item and is not being started separately.
+Current execution: T03 was integrated by PR #20 Merge Commit `3cfe2eb2305c41bd5bd4a618fc36aa9f3627060f`; its source branch is retained. T04 is VERIFIED at `92588b07fe3f3572dd459137a363de4e6848ba52` on `feature/W008-guest-session-frontend`, based on that updated `develop`; independent review PASS and developer validation are recorded. PR creation/integration remain pending. T05 remains a later cross-task W008 completion item and is not being started separately.
 
 | Task | Change | Requirement / acceptance refs | Deliverable | Validation |
 |---|---|---|---|---|
@@ -33,7 +33,7 @@ Current execution: T03 was integrated by PR #20 Merge Commit `3cfe2eb2305c41bd5b
 - [x] Documentation synchronized
 - [x] PR #19 merged to `develop` as `c319fb78a6a9c2438738c2007ba0d9e11603e436`; feature branch retained
 - [x] T03 developer validation completed and recorded; independent review PASS at `aee0fe99dd74aa3b93bc8570be0cbdbb2bc8f7bb`; PR #20 integrated into `develop` as Merge Commit `3cfe2eb2305c41bd5bd4a618fc36aa9f3627060f`, source branch retained
-- [ ] T04 Thai username entry, session bootstrap/recovery, and display-name-only persistence implemented; exact-revision independent review and PR integration pending
+- [x] T04 Thai username entry, session bootstrap/recovery, display-name-only persistence, and developer validation completed; independent review PASS at `92588b07fe3f3572dd459137a363de4e6848ba52`; PR creation/integration pending
 
 ## T01 design acceptance
 
