@@ -19,6 +19,7 @@ func TestResolverTrustBoundary(t *testing.T) {
 		{"trusted proxy selects first untrusted hop", "10.0.0.2:443", "198.51.100.8, 10.1.0.2", "198.51.100.8", false},
 		{"trusted peer needs chain", "10.0.0.2:443", "", "", true},
 		{"malformed chain", "10.0.0.2:443", "198.51.100.1, garbage", "", true},
+		{"forwarded port rejected", "10.0.0.2:443", "198.51.100.1:80", "", true},
 		{"zone rejected", "[fe80::1%lo]:443", "", "", true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

@@ -58,8 +58,8 @@ func (r Resolver) Resolve(remoteAddr, forwardedFor string) (netip.Addr, error) {
 		if p == "" {
 			return netip.Addr{}, ErrInvalidSource
 		}
-		a, e := parseAddr(p)
-		if e != nil {
+		a, e := netip.ParseAddr(p)
+		if e != nil || a.Zone() != "" {
 			return netip.Addr{}, ErrInvalidSource
 		}
 		chain = append(chain, a.Unmap())

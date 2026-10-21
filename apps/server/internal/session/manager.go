@@ -155,8 +155,11 @@ func NewManager(cfg Config) (*Manager, error) {
 	if cfg.RetryMin <= 0 {
 		cfg.RetryMin = 100 * time.Millisecond
 	}
-	if cfg.RetryMax < cfg.RetryMin {
+	if cfg.RetryMax <= 0 {
 		cfg.RetryMax = 30 * time.Second
+	}
+	if cfg.RetryMax < cfg.RetryMin {
+		return nil, fmt.Errorf("expiry retry maximum must be greater than or equal to retry minimum")
 	}
 	if cfg.Random == nil {
 		cfg.Random = rand.Reader
@@ -448,7 +451,12 @@ func (m *Manager) delivered(r *record) {
 			items = append(items, x)
 		}
 	}
-	sort.Slice(items, func(i, j int) bool { return items[i].deadline < items[j].deadline })
+	sort.Slice(items, func(i, j int) bool {
+		if items[i].deadline == items[j].deadline {
+			return items[i].identity.GuestID < items[j].identity.GuestID
+		}
+		return items[i].deadline < items[j].deadline
+	})
 	for _, x := range items {
 		select {
 		case m.queue <- queuedEvent{rec: x, event: x.event}:

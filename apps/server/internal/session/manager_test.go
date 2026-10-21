@@ -1,6 +1,7 @@
 package session
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
@@ -10,6 +11,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"testing/iotest"
 	"time"
 
 	"github.com/thg1rb/prickle-panic/apps/server/internal/clock"
@@ -95,6 +97,13 @@ func newManager(t *testing.T, c clock.Clock, sink ExpirySink, opts func(*Config)
 	return m
 }
 
+func TestManagerRejectsInvalidRetryBounds(t *testing.T) {
+	_, err := NewManager(Config{Clock: newTestClock(), Sink: sinkFunc(func(context.Context, ExpiryEvent) error { return nil }), RetryMin: time.Second, RetryMax: time.Millisecond})
+	if err == nil {
+		t.Fatal("invalid retry bounds accepted")
+	}
+}
+
 func TestCreateLookupRevokeAndRedaction(t *testing.T) {
 	c := newTestClock()
 	m := newManager(t, c, sinkFunc(func(context.Context, ExpiryEvent) error { return nil }), nil)
@@ -132,6 +141,39 @@ func TestCreateLookupRevokeAndRedaction(t *testing.T) {
 	}
 	if _, err = m.Lookup(created.Credential.CookieValue()); !errors.Is(err, ErrUnauthenticated) {
 		t.Fatalf("revoked lookup: %v", err)
+	}
+}
+
+func TestCredentialUniquenessCollisionRetryAndEntropyFailure(t *testing.T) {
+	c := newTestClock()
+	sequence := append(bytes.Repeat([]byte{1}, 16), bytes.Repeat([]byte{2}, 32)...)
+	sequence = append(sequence, bytes.Repeat([]byte{3}, 16)...)
+	sequence = append(sequence, bytes.Repeat([]byte{2}, 32)...)
+	sequence = append(sequence, bytes.Repeat([]byte{4}, 32)...)
+	m := newManager(t, c, sinkFunc(func(context.Context, ExpiryEvent) error { return nil }), func(cfg *Config) { cfg.Random = bytes.NewReader(sequence) })
+	a, err := m.Create("AA", "192.0.2.1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, err := m.Create("BB", "192.0.2.1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if a.Identity.GuestID == b.Identity.GuestID || a.Credential.CookieValue() == b.Credential.CookieValue() {
+		t.Fatal("allocated identities or credentials were reused")
+	}
+	if _, err := m.Lookup(a.Credential.CookieValue()); err != nil {
+		t.Fatalf("first credential lookup: %v", err)
+	}
+	if _, err := m.Lookup(b.Credential.CookieValue()); err != nil {
+		t.Fatalf("retried credential lookup: %v", err)
+	}
+	failing := newManager(t, c, sinkFunc(func(context.Context, ExpiryEvent) error { return nil }), func(cfg *Config) { cfg.Random = iotest.ErrReader(errors.New("entropy unavailable")) })
+	if _, err := failing.Create("CC", "192.0.2.2"); !errors.Is(err, ErrUnavailable) {
+		t.Fatalf("entropy failure must fail closed: %v", err)
+	}
+	if len(failing.allocations) != 0 {
+		t.Fatal("failed credential generation consumed an allocation quota")
 	}
 }
 
@@ -248,6 +290,24 @@ func TestExpirationEventAndProactiveScheduler(t *testing.T) {
 	}
 	if _, err = m.Lookup(created.Credential.CookieValue()); !errors.Is(err, ErrUnauthenticated) {
 		t.Fatalf("expired credential authorized: %v", err)
+	}
+}
+
+func TestAbsoluteExpirationEventReason(t *testing.T) {
+	c := newTestClock()
+	events := make(chan ExpiryEvent, 1)
+	m := newManager(t, c, sinkFunc(func(_ context.Context, e ExpiryEvent) error { events <- e; return nil }), func(cfg *Config) { cfg.IdleTTL = time.Minute; cfg.AbsoluteTTL = 5 * time.Second })
+	if _, err := m.Create("AB", "192.0.2.1"); err != nil {
+		t.Fatal(err)
+	}
+	c.Advance(5 * time.Second)
+	select {
+	case event := <-events:
+		if event.Reason != AbsoluteTimeout {
+			t.Fatalf("reason=%s want=%s", event.Reason, AbsoluteTimeout)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("absolute expiry event not delivered")
 	}
 }
 
