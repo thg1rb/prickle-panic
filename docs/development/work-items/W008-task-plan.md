@@ -2,7 +2,7 @@
 
 Specification: `docs/development/work-items/W008-guest-session.md` (SPEC_READY; approved policy integrated by PR #10; T01 design PASS at `3d9ed43a3215f339e19f10464aaedfa241f866f8`; integrated by PR #18 merge commit `774ec869a2ac2c96914cfb60a0bfe9cb7b70a08d`)
 Branch: `feature/W008-guest-session-implementation` (T02 implementation; based on updated develop at `774ec869a2ac2c96914cfb60a0bfe9cb7b70a08d`)
-Current execution: T02 — IN_PROGRESS. T03 HTTP/cookie work and T04 frontend work have not started.
+Current execution: T02 — READY_FOR_REVIEW. PR #19 is open; required CI is pending. T03 HTTP/cookie work and T04 frontend work have not started.
 
 | Task | Change | Requirement / acceptance refs | Deliverable | Validation |
 |---|---|---|---|---|
