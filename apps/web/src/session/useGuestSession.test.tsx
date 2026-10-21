@@ -103,6 +103,57 @@ describe("Guest Session bootstrap and recovery", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it("aborts an in-flight recovery request when the component unmounts", async () => {
+    let requestSignal: AbortSignal | undefined;
+    const fetchMock = vi.fn((_url: string, init: RequestInit) => {
+      requestSignal = init.signal as AbortSignal;
+      return new Promise<Response>(() => {});
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { unmount } = renderHook(() => useGuestSession());
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+    expect(requestSignal?.aborted).toBe(false);
+
+    unmount();
+
+    expect(requestSignal?.aborted).toBe(true);
+  });
+
+  it("ignores a late StrictMode recovery response from a superseded request", async () => {
+    let resolveFirst: ((response: Response) => void) | undefined;
+    const fetchMock = vi
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise<Response>((resolve) => {
+            resolveFirst = resolve;
+          }),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({ error: { code: "SESSION_REQUIRED" } }, 401),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { result } = renderHook(() => useGuestSession(), {
+      wrapper: StrictMode,
+    });
+    await waitFor(() =>
+      expect(result.current.state.status).toBe("UNAUTHENTICATED"),
+    );
+
+    await act(async () => {
+      resolveFirst?.(jsonResponse(guest));
+    });
+
+    expect(result.current.state).toMatchObject({
+      status: "UNAUTHENTICATED",
+    });
+    expect(result.current.state).not.toMatchObject({
+      status: "AUTHENTICATED",
+    });
+  });
+
   it("does not treat a saved display name as authorization", async () => {
     localStorage.setItem(displayNameStorageKey, "Coco");
     vi.stubGlobal(
