@@ -8,10 +8,26 @@ import {
 } from "./game/localSpeedBattle";
 import { LocalCardArt } from "./game/LocalCardArt";
 import { PhaserBoard } from "./game/PhaserBoard";
+import { GuestSessionGate } from "./session/GuestSessionGate";
+import { useGuestSession } from "./session/useGuestSession";
 
 type Screen = "home" | "game" | "results";
 
 function App() {
+  const guest = useGuestSession();
+  if (guest.state.status !== "AUTHENTICATED") {
+    return (
+      <GuestSessionGate
+        state={guest.state}
+        onCreate={guest.create}
+        onRetryRecovery={guest.retryRecovery}
+      />
+    );
+  }
+  return <AuthenticatedApp username={guest.state.session.username} />;
+}
+
+function AuthenticatedApp({ username }: { username: string }) {
   const [screen, setScreen] = useState<Screen>("home");
   const [game, setGame] = useState<LocalSpeedBattleState | null>(null);
   const [nowMs, setNowMs] = useState(() => Date.now());
@@ -185,6 +201,9 @@ function App() {
           </span>
           <span>{th.picnic}</span>
         </div>
+        <p className="guest-badge">
+          <span aria-hidden="true">●</span> {th.guest.greeting} {username}
+        </p>
         <span className="home-duration">{th.home.duration}</span>
       </header>
 
