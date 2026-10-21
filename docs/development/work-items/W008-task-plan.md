@@ -2,7 +2,7 @@
 
 Specification: `docs/development/work-items/W008-guest-session.md` (SPEC_READY; approved policy integrated by PR #10; T01 design PASS at `3d9ed43a3215f339e19f10464aaedfa241f866f8`; integrated by PR #18 merge commit `774ec869a2ac2c96914cfb60a0bfe9cb7b70a08d`)
 T02 branch: `feature/W008-guest-session-implementation`; integrated by PR #19 Merge Commit `c319fb78a6a9c2438738c2007ba0d9e11603e436`, with the feature branch retained.
-Current execution: T03 — READY_FOR_REVIEW on `feature/W008-guest-session-http`, based on updated `develop` at `c319fb78a6a9c2438738c2007ba0d9e11603e436`. Developer validation passed. Independent review and PR creation remain pending. T04 has not started. T03 documentation, validation, review, and PR are its exit gates; T05 remains a later cross-task W008 completion item and is not being started separately.
+Current execution: T03 — VERIFIED on `feature/W008-guest-session-http`, based on `develop` at `c319fb78a6a9c2438738c2007ba0d9e11603e436`. Independent review PASS covers implementation revision `aee0fe99dd74aa3b93bc8570be0cbdbb2bc8f7bb`; PR #20 is open against `develop` and required CI passes. T03 awaits separate Project Owner merge authorization. T04 has not started. T05 remains a later cross-task W008 completion item and is not being started separately.
 
 | Task | Change | Requirement / acceptance refs | Deliverable | Validation |
 |---|---|---|---|---|
