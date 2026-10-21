@@ -173,3 +173,38 @@ Other remediation details: W008 records the Owner-approved Match-deadline preced
 ### Final decision
 
 PASS at commit `3d9ed43a3215f339e19f10464aaedfa241f866f8`. The final review confirmed the approved W008 policy, API, cookie, proxy, quota, Unicode, and W008/W010/W013 integration boundaries. This is a design review only; no guest-session implementation or implementation tests were reviewed or run. T02 has not started. PASS does not authorize T01 PR merge.
+
+## Review 9 — T02 Guest Session implementation
+
+- Work Item: W008 T02
+- Branch: `feature/W008-guest-session-implementation`
+- Reviewed implementation SHA: `b24338a1d3d987e6fe23ff3dc2c39c9bc29ef615`
+- Reviewer execution reference: Independent read-only Sub-Agent (`/root/w008_spec_review`)
+- Review type: Exact-revision code, test, requirement, and integration-boundary review; one implementation re-review and one test-only re-review
+
+### Evidence inspected
+
+- `docs/REQUIREMENT.md` §§6.2, 6.5, 13.1, 14.4, and W008 security/functional requirement IDs
+- W008 specification, task plan, T01 design, and implementation report
+- Full T02 implementation diff and tests in `apps/server/internal/session/`, `internal/clientip/`, and `internal/clock/`
+- W009, W010, and W013 boundaries and the approved session-expiry policy
+- Actual developer test results and the current Git revision
+
+### Findings and remediation
+
+1. PASS review at `ddc8a46a956a56a124d8f3a523adebe1df5fac8a` found no substantive issues and two MINOR test gaps: the entropy failure test failed during guest-ID generation rather than credential generation, and the absolute-lifetime test could fail at the earlier idle deadline. Both were fixed in `b24338a`: the test reader now returns guest-ID bytes before failing the credential read, and the absolute-lifetime test records successful activity through tick 24 before verifying rejection at the fixed tick-25 deadline.
+2. The reviewer re-reviewed `b24338a1d3d987e6fe23ff3dc2c39c9bc29ef615` and confirmed both MINOR findings resolved, with no new findings.
+
+### Validation independently run by reviewer
+
+- `pnpm check` — PASS
+- `go test ./...` — PASS
+- `go test -race ./...` — PASS
+- `go vet ./...` — PASS
+- `git diff --check` — PASS
+
+The reviewer verified the current implementation report's dependency-audit and `govulncheck` evidence but did not rerun those commands. GitHub CI had not run because the implementation PR was not yet open.
+
+### Final decision
+
+PASS at `b24338a1d3d987e6fe23ff3dc2c39c9bc29ef615`. No unresolved BLOCKER, MAJOR, MINOR, or SUGGESTION findings remain. The implementation matches the approved session lifetime, credential storage, activity qualification, creation quota, username policy, trusted proxy boundary, and expiry-event contract. HTTP/cookies, WebSocket handling, Room logic, Match forfeit, and frontend behavior remain out of T02 scope. The PASS validates implementation quality; it does not authorize PR merge.
