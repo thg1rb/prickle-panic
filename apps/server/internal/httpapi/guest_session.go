@@ -196,14 +196,10 @@ func (h *Handler) createOrReuse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	credential := created.Credential.CookieValue()
-	// Re-read authorization to account for time spent validating and allocating;
-	// cookie expiry is taken from the manager's immutable absolute deadline.
-	authorized, err := h.sessions.LookupAuthorized(credential)
-	if err != nil {
-		h.writeSessionError(w, err)
-		return
-	}
-	h.writeSession(w, http.StatusCreated, authorized.Identity, authorized.AbsoluteRemaining, authorized.AbsoluteExpiresAt, credential)
+	// Create returns the identity and immutable absolute deadline atomically
+	// with allocation. Avoid a second authorization lookup here: expiry-event
+	// backpressure after allocation must not strand a newly-created session.
+	h.writeSession(w, http.StatusCreated, created.Identity, created.AbsoluteRemaining, created.AbsoluteExpiresAt, credential)
 }
 
 func (h *Handler) recover(w http.ResponseWriter, r *http.Request) {

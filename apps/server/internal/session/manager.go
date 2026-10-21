@@ -80,8 +80,10 @@ func (Credential) GoString() string              { return "[REDACTED]" }
 func (Credential) Format(s fmt.State, verb rune) { _, _ = io.WriteString(s, "[REDACTED]") }
 
 type Created struct {
-	Identity   Identity
-	Credential Credential
+	Identity          Identity
+	Credential        Credential
+	AbsoluteRemaining time.Duration
+	AbsoluteExpiresAt time.Time
 }
 
 type record struct {
@@ -254,7 +256,12 @@ func (m *Manager) Create(rawUsername, sourceIP string) (Created, error) {
 	a.ticks = append(a.ticks, now.Tick)
 	m.allocations[sourceIP] = a
 	m.signal()
-	return Created{Identity: identity, Credential: Credential{value: credential}}, nil
+	return Created{
+		Identity:          identity,
+		Credential:        Credential{value: credential},
+		AbsoluteRemaining: m.cfg.AbsoluteTTL,
+		AbsoluteExpiresAt: now.UTC.Add(m.cfg.AbsoluteTTL),
+	}, nil
 }
 
 // CheckCreationCapacity is a non-consuming preflight for bounded HTTP request

@@ -112,6 +112,12 @@ func TestCreateLookupRevokeAndRedaction(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if created.AbsoluteRemaining != m.cfg.AbsoluteTTL {
+		t.Fatalf("created absolute remaining = %s, want %s", created.AbsoluteRemaining, m.cfg.AbsoluteTTL)
+	}
+	if !created.AbsoluteExpiresAt.Equal(c.Now().UTC.Add(m.cfg.AbsoluteTTL)) {
+		t.Fatalf("created absolute expiry = %s, want %s", created.AbsoluteExpiresAt, c.Now().UTC.Add(m.cfg.AbsoluteTTL))
+	}
 	token := created.Credential.CookieValue()
 	if len(token) < 40 {
 		t.Fatalf("credential too short: %d", len(token))
